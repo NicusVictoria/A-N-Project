@@ -12,9 +12,9 @@ namespace AN_Project
         /// <summary>
         /// List of tuples (neighbour generator, chance to use this generator)
         /// </summary>
-        static List<(NeighbourGenerator, double)> usageChance = new List<(NeighbourGenerator, double)>
+        public static List<(NeighbourGenerator, double)> usageChance = new List<(NeighbourGenerator, double)>
         {
-
+            (new SwapNeighbourGenerator(), 1.0f)
         };
 
         /// <summary>
@@ -47,10 +47,39 @@ namespace AN_Project
     abstract class NeighbourGenerator
     {
         /// <summary>
-        /// Generates a new neighbour
+        /// Generates a random new neighbour
         /// </summary>
         /// <param name="state">The current state</param>
         /// <returns>A generated neighbour</returns>
-        public abstract Neighbour Generate(State state);
+        public abstract Neighbour GenerateRandom(State state);
+        
+        /// <summary>
+        /// Generates all new neighbours
+        /// </summary>
+        /// <param name="state">The current state</param>
+        /// <returns>All generated neighbours</returns>
+        public abstract List<Neighbour> GenerateAll(State state);
+    }
+
+    class SwapNeighbourGenerator : NeighbourGenerator
+    {
+        public override List<Neighbour> GenerateAll(State state)
+        {
+            List<Neighbour> generatedNeighbours = new List<Neighbour>(state.Tree.Nodes.Count - 1);
+
+            foreach (Node n in state.Tree.Nodes)
+            {
+                if (n == state.Tree.Root) continue;
+
+                generatedNeighbours.Add(new SwapNeighbour(state, n));
+            }
+
+            return generatedNeighbours;
+        }
+
+        public override Neighbour GenerateRandom(State state)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

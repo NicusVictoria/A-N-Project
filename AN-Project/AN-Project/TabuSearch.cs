@@ -16,10 +16,38 @@ namespace AN_Project
         public State Search()
         {
             State state = BaseSolutionGenerator.Empty();
+
+            double bestTotalScore = state.Tree.Score;
+            State bestTotalState = state.Clone();
             
             while (true)
             {
+                List<Neighbour> neighbours = new List<Neighbour>();
+                foreach ((NeighbourGenerator ng, float f) tuple in NeighbourGeneratorGenerator.usageChance)
+                {
+                     neighbours.AddRange(tuple.ng.GenerateAll(state));
+                }
 
+                double bestNewScore = -1;
+
+                // TODO: parallelise this stuff
+                foreach (Neighbour neighbour in neighbours)
+                {
+                    State newState = neighbour.Result();
+                    double newScore = newState.Tree.Score;
+
+                    if (newScore > bestNewScore)
+                    {
+                        state = newState;
+                        bestNewScore = newScore;
+
+                        if (newScore > bestTotalScore)
+                        {
+                            bestTotalState = newState;
+                            bestTotalScore = newScore;
+                        }
+                    }
+                }
             }
         }
     }

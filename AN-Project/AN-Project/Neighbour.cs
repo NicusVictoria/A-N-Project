@@ -27,4 +27,35 @@ namespace AN_Project
         /// <returns>The difference in score between the new and old neighbours</returns>
         public abstract double Delta();
     }
+
+    class SwapNeighbour : Neighbour
+    {
+        private State state;
+        private readonly State originalState;
+        private Node swapNode;
+
+        public SwapNeighbour(State state, Node swapNode)
+        {
+            this.state = state;
+            this.swapNode = swapNode;
+
+            originalState = state.Clone();
+        }
+
+        public override double Delta()
+        {
+            throw new NotImplementedException();
+        }
+
+        public override State Result()
+        {
+            state.Tree.SwapWithParent(swapNode);
+            return state;
+        }
+
+        public override State Revert()
+        {
+            return originalState;
+        }
+    }
 }

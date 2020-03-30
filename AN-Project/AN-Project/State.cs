@@ -9,7 +9,12 @@ namespace AN_Project
     /// </summary>
     class State
     {
+        public Tree Tree { get; set; }
 
+        public State Clone()
+        {
+            return (State)MemberwiseClone();
+        }
     }
 
     /// <summary>
@@ -53,7 +58,7 @@ namespace AN_Project
         /// <summary>
         /// List of nodes in the tree
         /// </summary>
-        private List<Node> nodes;
+        public List<Node> Nodes { get; set; }
         
         /// <summary>
         /// Scorekeeper
@@ -87,7 +92,7 @@ namespace AN_Project
         {
             LowestNodes.Clear();
             
-            foreach (Node n in nodes)
+            foreach (Node n in Nodes)
             {
                 if (n.depth == Depth)
                 {
@@ -102,6 +107,8 @@ namespace AN_Project
         /// <param name="node">The node to be swapped with its parent</param>
         public void SwapWithParent(Node node)
         {
+            if (Root == node) throw new Exception("Cannot swap the root of the tree!");
+
             // Save the old parent for later use
             Node parent = node.Parent;
 
