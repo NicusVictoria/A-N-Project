@@ -4,30 +4,53 @@ using System.Text;
 
 namespace AN_Project
 {
+    /// <summary>
+    /// Class that generates a neighbourgenerator
+    /// </summary>
     class NeighbourGeneratorGenerator
     {
+        /// <summary>
+        /// List of tuples (neighbour generator, chance to use this generator)
+        /// </summary>
         static List<(NeighbourGenerator, double)> usageChance = new List<(NeighbourGenerator, double)>
         {
 
         };
 
+        /// <summary>
+        /// Generates a random neighbourgenerator
+        /// </summary>
+        /// <param name="r">The random used</param>
+        /// <returns>A random neighbourgenerator</returns>
         public static NeighbourGenerator GenerateRandom(Random r)
         {
             double accum = 0;
             double random = r.NextDouble();
             int index = 0;
+
+            // Update the accumulative value until it is equal or larger than the random value.
+            // Then return the generator that corresponds to that value.
             while (accum < random)
             {
                 double chance = usageChance[index].Item2;
                 accum += chance;
                 index++;
             }
+
             return usageChance[index - 1].Item1;
         }
     }
 
+    /// <summary>
+    /// Abstract class of an object that generates neighbours
+    /// </summary>
     abstract class NeighbourGenerator
     {
-        public abstract Neighbour Generate(State s);
+        /// <summary>
+        /// Generates a new neighbour
+        /// </summary>
+        /// <param name="state">The current state</param>
+        /// <returns>A generated neighbour</returns>
+        public abstract Neighbour Generate(State state);
     }
 }

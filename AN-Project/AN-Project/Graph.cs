@@ -5,11 +5,10 @@ using System.Text;
 
 namespace AN_Project
 {
-    class Graph
-    {
-
-    }
-
+    /// <summary>
+    /// Interface for a graph
+    /// </summary>
+    /// <typeparam name="N">Type of the nodes in the graph</typeparam>
     public interface IGraph<N>
     {
         /// <summary>
@@ -17,7 +16,7 @@ namespace AN_Project
         /// </summary>
         /// <param name="a">One of the nodes of the connection (origin if arc)</param>
         /// <param name="b">The other node of the connection (target if arc)</param>
-        /// <returns></returns>
+        /// <returns>True if the nodes are connected, false otherwise</returns>
         bool Connected(N a, N b);
 
         /// <summary>
@@ -36,8 +35,15 @@ namespace AN_Project
     /// </summary>
     public class UndirectedGraph : IGraph<int>
     {
+        /// <summary>
+        /// The number of nodes in this graph
+        /// </summary>
         protected int count;
-        protected List<List<bool>> adjacency;
+
+        /// <summary>
+        /// The adjacency matrix containing all edges in the graph
+        /// </summary>
+        protected List<List<bool>> adjacencyMatrix;
 
         /// <summary>
         /// Adds a new node. O(n) where n is the amount of nodes already in the graph.
@@ -45,18 +51,20 @@ namespace AN_Project
         public void AddNode()
         {
             count++;
-            foreach (List<bool> l in adjacency)
+
+            foreach (List<bool> l in adjacencyMatrix)
             {
                 l.Add(false);
             }
-            adjacency.Add(new List<bool>());
+
+            adjacencyMatrix.Add(new List<bool>());
         }
 
         /// <summary>
         /// Adds an edge (both directions) to the graph. O(1).
         /// </summary>
-        /// <param name="index1"></param>
-        /// <param name="index2"></param>
+        /// <param name="index1">The index of the start node</param>
+        /// <param name="index2">The index of the destination node</param>
         public void AddEdge(int index1, int index2)
         {
             if (index1 < index2)
@@ -65,32 +73,38 @@ namespace AN_Project
                 index1 = index2;
                 index2 = temp;
             }
-            adjacency[index1][index2] = true;
+
+            adjacencyMatrix[index1][index2] = true;
         }
 
         /// <summary>
         /// Checks if there is an edge between the specified nodes. Order of nodes does not matter. O(1).
         /// </summary>
-        /// <param name="index1">the index of the first node</param>
-        /// <param name="index2">the index of the second node</param>
-        /// <returns></returns>
+        /// <param name="index1">The index of the first node</param>
+        /// <param name="index2">The index of the second node</param>
+        /// <returns>True if the nodes are connected, false otherwise</returns>
         public bool Connected(int index1, int index2)
         {
-            if (index1 > count || index2 > count) throw new Exception("this index is higher than the amount of nodes in the graph");
+            if (index1 > count) throw new IndexOutOfRangeException($"The index ({index1}) of node 1 is higher than the amount of nodes in the graph ({count})!");
+            if (index2 > count) throw new IndexOutOfRangeException($"The index ({index2}) of node 2 is higher than the amount of nodes in the graph ({count})!");
+            
             if (index1 < index2)
             {
                 int temp = index1;
                 index1 = index2;
                 index2 = temp;
             }
-            return adjacency[index1][index2];
+
+            return adjacencyMatrix[index1][index2];
         }
 
         /// <summary>
         /// Returns all nodes that are currently in the graph. O(n) where n is the amounnt of nodes currently in the graph.
         /// </summary>
-        public List<int> Nodes {
-            get {
+        public List<int> Nodes
+        {
+            get
+            {
                 return Enumerable.Range(0, count).ToList();
             }
         }
