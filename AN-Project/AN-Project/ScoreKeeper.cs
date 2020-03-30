@@ -6,5 +6,6 @@ namespace AN_Project
 {
     class ScoreKeeper
     {
+        public double CurrentScore { get; }
     }
 }

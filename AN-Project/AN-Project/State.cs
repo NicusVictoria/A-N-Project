@@ -31,6 +31,8 @@ namespace AN_Project
 
     public class Tree : ITree<Node>
     {
+        private List<Node> Nodes;
+        
         private readonly ScoreKeeper scoreKeeper = new ScoreKeeper();
         public Node Root { get; private set; }
         public int Depth { get; private set; }
@@ -39,24 +41,43 @@ namespace AN_Project
 
         public List<Node> LowestNodes { get; private set; }
 
+        private void UpdateLowestNodes()
+        {
+            LowestNodes.Clear();
+            foreach(Node n in Nodes)
+            {
+                if(n.depth == Depth)
+                {
+                    LowestNodes.Add(n);
+                }
+            }
+        }
+
         public void SwapWithParent(Node node)
         {
+
+
             Node parent = node.Parent;
+
+            Depth = Math.Max(Depth, parent.RecursivelyAdjustDepth(1));
+            node.depth -= 2;
+
             parent.Children.AddRange(node.Children);
             foreach (Node n in node.Children)
             {
                 n.Parent = parent;
-                n.depth;
             }
 
-            
+            if (parent == Root) Root = node;
+
             node.Children = new List<Node>{ parent } ;
             node.Parent = node.Parent.Parent;
             parent.Parent.Children.Remove(parent);
             parent.Parent.Children.Add(node);
             parent.Parent = node;
 
-            parent.RecursivelyAdjustDepth();
+            UpdateLowestNodes();
+
         }
 
 
@@ -70,14 +91,18 @@ namespace AN_Project
 
     public class Node  : ITreeNode<Node>
     {
-        public void RecursivelyAdjustDepth()
+        public int RecursivelyAdjustDepth(int change)
         {
-            depth++;
+            depth+= change;
+            int maxDepth = depth;
             foreach(Node n in Children)
             {
-                n.RecursivelyAdjustDepth();
+                maxDepth = Math.Max(maxDepth, n.RecursivelyAdjustDepth(change));
             }
+            return maxDepth;
+
         }
+
         public List<Node> Children { get; set; }
         public Node Parent { get; set; }
 
