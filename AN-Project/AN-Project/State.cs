@@ -55,7 +55,9 @@ namespace AN_Project
         /// </summary>
         private List<Node> nodes;
         
-        // Scorekeeper
+        /// <summary>
+        /// Scorekeeper
+        /// </summary>
         private readonly ScoreKeeper scoreKeeper = new ScoreKeeper();
         
         /// <summary>
