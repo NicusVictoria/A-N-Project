@@ -68,12 +68,12 @@ namespace AN_Project
         /// <summary>
         /// Root of the tree
         /// </summary>
-        public Node Root { get; private set; }
+        public Node Root { get; set; }
         
         /// <summary>
         /// The depth of the tree
         /// </summary>
-        public int Depth { get; private set; }
+        public int Depth { get; set; }
 
         /// <summary>
         /// The score of this solution / tree
@@ -88,9 +88,9 @@ namespace AN_Project
         /// <summary>
         /// Updates the list of lowest nodes
         /// </summary>
-        private void UpdateLowestNodes()
+        public void UpdateLowestNodes()
         {
-            LowestNodes.Clear();
+            LowestNodes = new List<Node>();
             
             foreach (Node n in Nodes)
             {
@@ -186,6 +186,11 @@ namespace AN_Project
         /// The parent of this node
         /// </summary>
         public Node Parent { get; set; }
+
+        /// <summary>
+        /// The index of this node in the list of nodes in the tree
+        /// </summary>
+        public int Index { get; set; }
 
         /// <summary>
         /// Recursively adjusts the depth of this node and all its children

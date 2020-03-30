@@ -46,6 +46,30 @@ namespace AN_Project
         protected List<List<bool>> adjacencyMatrix;
 
         /// <summary>
+        /// Constructor when the number of nodes is not known
+        /// </summary>
+        public UndirectedGraph()
+        {
+
+        }
+
+        /// <summary>
+        /// Constructor for undirected graph when the number of nodes is already known
+        /// </summary>
+        /// <param name="count">The number of nodes in the graph</param>
+        public UndirectedGraph(int count)
+        {
+            this.count = count;
+
+            adjacencyMatrix = new List<List<bool>>(new List<bool>[count]);
+
+            for (int i = 0; i < count; i++)
+            {
+                adjacencyMatrix[i] = new List<bool>(new bool[count]);
+            }
+        }
+
+        /// <summary>
         /// Adds a new node. O(n) where n is the amount of nodes already in the graph.
         /// </summary>
         public void AddNode()
@@ -57,7 +81,7 @@ namespace AN_Project
                 l.Add(false);
             }
 
-            adjacencyMatrix.Add(new List<bool>());
+            adjacencyMatrix.Add(new List<bool>(count));
         }
 
         /// <summary>
