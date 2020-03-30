@@ -49,7 +49,7 @@ namespace AN_Project
 
         public override State Result()
         {
-            state.Tree.SwapWithParent(swapNode);
+            state.Tree.SwapWithParent(state, swapNode);
             return state;
         }
 

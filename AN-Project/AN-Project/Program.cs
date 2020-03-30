@@ -7,6 +7,12 @@ namespace AN_Project
     class Program
     {
         public static UndirectedGraph inputGraph;
+        public static int maxDegree;
+        public static int[] degreeRatios;
+        public static int maxDistanceCOG;
+        public static int[] distanceRatiosToCOG;
+        public static double averageDegreeRatio;
+        public static double averageDistanceRatio;
 
         static void Main(string[] args)
         {

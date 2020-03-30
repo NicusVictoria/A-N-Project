@@ -49,6 +49,8 @@ namespace AN_Project
 
             firstState.Tree.UpdateLowestNodes();
 
+            firstState.Tree.ScoreKeeper.CalculateTreeScore(firstState);
+
             return firstState;
         }
     }

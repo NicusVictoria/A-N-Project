@@ -7,7 +7,7 @@ namespace AN_Project
     /// <summary>
     /// Class containing the current state of the program
     /// </summary>
-    class State
+    public class State
     {
         public Tree Tree { get; set; }
 
@@ -63,7 +63,7 @@ namespace AN_Project
         /// <summary>
         /// Scorekeeper
         /// </summary>
-        private readonly ScoreKeeper scoreKeeper = new ScoreKeeper();
+        public ScoreKeeper ScoreKeeper { get; private set; }
         
         /// <summary>
         /// Root of the tree
@@ -78,12 +78,17 @@ namespace AN_Project
         /// <summary>
         /// The score of this solution / tree
         /// </summary>
-        public double Score { get { return scoreKeeper.CurrentScore; } }
+        public double Score { get { return ScoreKeeper.CurrentScore; } }
 
         /// <summary>
         /// List of nodes that are on the lowest level; not equal to the leaves.
         /// </summary>
         public List<Node> LowestNodes { get; private set; }
+
+        public Tree()
+        {
+            ScoreKeeper = new ScoreKeeper();
+        }
 
         /// <summary>
         /// Updates the list of lowest nodes
@@ -105,19 +110,21 @@ namespace AN_Project
         /// Swaps a node with its parents and moces all children of these nodes to the new lower node
         /// </summary>
         /// <param name="node">The node to be swapped with its parent</param>
-        public void SwapWithParent(Node node)
+        public void SwapWithParent(State state, Node node)
         {
             if (Root == node) throw new Exception("Cannot swap the root of the tree!");
 
             // Save the old parent for later use
             Node parent = node.Parent;
 
+            parent.Children.Remove(node);
+
             // Update the depth for the parent and all children of the parent
-            Depth = Math.Max(Depth, parent.RecursivelyAdjustDepth(1));
+            Depth = Math.Max(Depth, parent.RecursivelyAdjustDepthAndScore(state, ScoreKeeper, 1));
 
             // The node that is going to be swapped upwards has just been moved down by the RecursivelyAdjustDepth-call.
             // To compensate for this, and because it is going up one level in the tree because of the swap, decrease the depth by 2.
-            node.depth -= 2;
+            node.depth -= 1;
 
             // Add all children of "node" to the parent
             parent.Children.AddRange(node.Children);
@@ -191,21 +198,27 @@ namespace AN_Project
         /// The index of this node in the list of nodes in the tree
         /// </summary>
         public int Index { get; set; }
+        
+        public double DegreeScore { get; set; }
+        
+        public double DistanceScore { get; set; }
 
         /// <summary>
         /// Recursively adjusts the depth of this node and all its children
         /// </summary>
         /// <param name="change">The amount the depth should be changed by</param>
         /// <returns>The new maximum depth encountered in this subtree</returns>
-        public int RecursivelyAdjustDepth(int change)
+        public int RecursivelyAdjustDepthAndScore(State state, ScoreKeeper scoreKeeper, int change)
         {
             depth += change;
             int maxDepth = depth;
+
+            scoreKeeper.CalculateNodeScore(state, this);
             
             // Recursive call to all children, also updates the maxDepth along the way
             foreach(Node n in Children)
             {
-                maxDepth = Math.Max(maxDepth, n.RecursivelyAdjustDepth(change));
+                maxDepth = Math.Max(maxDepth, n.RecursivelyAdjustDepthAndScore(state, scoreKeeper, change));
             }
 
             return maxDepth;
