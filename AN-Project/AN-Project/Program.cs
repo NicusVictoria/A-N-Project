@@ -22,8 +22,12 @@ namespace AN_Project
             inputGraph = IO.ReadInput(filepath);
 
             State initialState = BaseSolutionGenerator.Empty();
+            string initialOutput = IO.WriteOutput(initialState);
 
-            string output = IO.WriteOutput(initialState);
+            TabuSearcher tabuSearcher = new TabuSearcher();
+            State resultState = tabuSearcher.Search();
+
+            string output = IO.WriteOutput(resultState);
         }
     }
 }

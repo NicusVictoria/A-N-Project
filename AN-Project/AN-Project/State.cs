@@ -145,8 +145,11 @@ namespace AN_Project
             node.Parent = node.Parent.Parent;
 
             // The swapped node is no child anymore of its old parent
-            parent.Parent.Children.Remove(parent);
-            parent.Parent.Children.Add(node);
+            if (parent.Parent != null)
+            {
+                parent.Parent.Children.Remove(parent);
+                parent.Parent.Children.Add(node);
+            }
             parent.Parent = node;
 
             // Update the list of the lowest nodes
@@ -159,8 +162,28 @@ namespace AN_Project
         /// <returns>A string in the output representation as requested by the challenge</returns>
         public override string ToString()
         {
-            // TODO: implement
-            throw new NotImplementedException();
+            StringBuilder stringBuilder = new StringBuilder();
+
+            stringBuilder.Append(Depth);
+            stringBuilder.Append("\n");
+
+            for (int i = 0; i < Nodes.Count; i++)
+            {
+                Node currentNode = Nodes[i];
+
+                if (currentNode == Root)
+                {
+                    stringBuilder.Append("0");
+                }
+                else
+                {
+                    stringBuilder.Append(currentNode.Parent.Index + 1);
+                }
+
+                stringBuilder.Append("\n");
+            }
+
+            return stringBuilder.ToString();
         }
 
         /// <summary>
@@ -213,7 +236,7 @@ namespace AN_Project
             depth += change;
             int maxDepth = depth;
 
-            scoreKeeper.CalculateNodeScore(state, this);
+            //scoreKeeper.CalculateNodeScore(state, this);
             
             // Recursive call to all children, also updates the maxDepth along the way
             foreach(Node n in Children)

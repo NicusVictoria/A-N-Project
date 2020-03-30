@@ -32,13 +32,16 @@ namespace AN_Project
             nodes.Add(root);
 
             Node parent = root;
+            parent.Children = new List<Node>();
+
             for (int i = 1; i < numberOfNodes; i++)
             {
                 Node newNode = new Node();
                 newNode.Index = i;
                 newNode.depth = i + 1;
                 newNode.Parent = parent;
-                parent.Children = new List<Node>() { newNode };
+                newNode.Children = new List<Node>();
+                parent.Children.Add(newNode);
                 nodes.Add(newNode);
 
                 parent = newNode;

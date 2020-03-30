@@ -21,11 +21,12 @@ namespace AN_Project
         public void CalculateTreeScore(State state)
         {
             double depthScore = CalculateDepthScore(state);
-            (double degreeScore, double distanceScore) = CalculateDegreeAndDistanceScore(state);
+            //(double degreeScore, double distanceScore) = CalculateDegreeAndDistanceScore(state);
 
-            CurrentScore = depthScore * depthWeight + degreeScore * degreeWeight + distanceScore * distanceWeight;
+            CurrentScore = depthScore * depthWeight /*+ degreeScore * degreeWeight + distanceScore * distanceWeight*/;
         }
 
+        /*
         public void CalculateNodeScore(State state, Node node)
         {
             double newDegreeScore = Program.degreeRatios[node.Index] * node.depth;
@@ -42,12 +43,14 @@ namespace AN_Project
 
             CurrentScore += deltaDeg * degreeWeight - deltaDist * distanceWeight; // TODO: We have also assumed this works for now :), but deep inside we know it won't work :'(((
         }
+        //*/
 
         private double CalculateDepthScore(State state)
         {
             return 1 - (state.Tree.Depth - 2) / (double)state.Tree.Nodes.Count;
         }
 
+        /*
         private (double degree, double distance) CalculateDegreeAndDistanceScore(State state)
         {
             double totalDeg = 0;
@@ -70,5 +73,6 @@ namespace AN_Project
 
             return (resDeg, resDist);
         }
+        //*/
     }
 }

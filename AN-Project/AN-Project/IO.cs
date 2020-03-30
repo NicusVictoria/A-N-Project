@@ -100,28 +100,7 @@ namespace AN_Project
 
         public static string WriteOutput(State finalState)
         {
-            StringBuilder stringBuilder = new StringBuilder();
-
-            stringBuilder.Append(finalState.Tree.Depth);
-            stringBuilder.Append("\n");
-
-            for (int i = 0; i < finalState.Tree.Nodes.Count; i++)
-            {
-                Node currentNode = finalState.Tree.Nodes[i];
-
-                if (currentNode == finalState.Tree.Root)
-                {
-                    stringBuilder.Append("0");
-                }
-                else
-                {
-                    stringBuilder.Append(currentNode.Parent.Index + 1);
-                }
-
-                stringBuilder.Append("\n");
-            }
-
-            return stringBuilder.ToString();
+            return finalState.Tree.ToString();
         }
     }
 }

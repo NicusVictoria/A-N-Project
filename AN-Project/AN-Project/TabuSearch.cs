@@ -7,7 +7,7 @@ namespace AN_Project
     /// <summary>
     /// Tabu search
     /// </summary>
-    class TabuSearch
+    class TabuSearcher
     {
         /// <summary>
         /// Uses Tabu Search to find a solution
@@ -19,9 +19,12 @@ namespace AN_Project
 
             double bestTotalScore = state.Tree.Score;
             State bestTotalState = state.Clone();
-            
+
+            int i = 0;
             while (true)
             {
+                i++;
+                 
                 List<Neighbour> neighbours = new List<Neighbour>();
                 foreach ((NeighbourGenerator ng, float f) tuple in NeighbourGeneratorGenerator.usageChance)
                 {
@@ -47,6 +50,11 @@ namespace AN_Project
                             bestTotalScore = newScore;
                         }
                     }
+                }
+
+                if (i == 1000)
+                {
+                    return bestTotalState;
                 }
             }
         }
