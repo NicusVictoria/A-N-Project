@@ -13,7 +13,7 @@ namespace AN_Project
 
         public State Clone()
         {
-            return (State)MemberwiseClone();
+            return this.Copy();
         }
     }
 
@@ -122,8 +122,7 @@ namespace AN_Project
             // Update the depth for the parent and all children of the parent
             Depth = Math.Max(Depth, parent.RecursivelyAdjustDepthAndScore(state, ScoreKeeper, 1));
 
-            // The node that is going to be swapped upwards has just been moved down by the RecursivelyAdjustDepth-call.
-            // To compensate for this, and because it is going up one level in the tree because of the swap, decrease the depth by 2.
+            // The swapped node is going up one level in the tree because of the swap, so decrease the depth by 1.
             node.depth -= 1;
 
             // Add all children of "node" to the parent
@@ -134,23 +133,24 @@ namespace AN_Project
                 n.Parent = parent;
             }
 
-            // If the old parent was the root, update the parent to the new node
-            if (parent == Root)
-            {
-                Root = node;
-            }
 
             // The only child of the new upper node is its old parent
             node.Children = new List<Node>{ parent };
-            node.Parent = node.Parent.Parent;
+            node.Parent = parent.Parent;
 
             // The swapped node is no child anymore of its old parent
-            if (parent.Parent != null)
+            if (parent != Root)
             {
                 parent.Parent.Children.Remove(parent);
                 parent.Parent.Children.Add(node);
             }
             parent.Parent = node;
+
+            // If the old parent was the root, update the parent to the new node
+            if (parent == Root)
+            {
+                Root = node;
+            }
 
             // Update the list of the lowest nodes
             UpdateLowestNodes();

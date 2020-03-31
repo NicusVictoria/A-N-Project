@@ -49,7 +49,15 @@ namespace AN_Project
 
         public override State Result()
         {
+            string treeBeforeSwap = state.Tree.ToString();
+            string originalTreeBeforeSwap = originalState.Tree.ToString();
+
             state.Tree.SwapWithParent(state, swapNode);
+
+            string originalTreeAfterSwap = originalState.Tree.ToString();
+
+            string swappedTree = state.Tree.ToString();
+
             return state;
         }
 

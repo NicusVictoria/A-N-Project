@@ -26,9 +26,9 @@ namespace AN_Project
                 i++;
                  
                 List<Neighbour> neighbours = new List<Neighbour>();
-                foreach ((NeighbourGenerator ng, float f) tuple in NeighbourGeneratorGenerator.usageChance)
+                foreach ((NeighbourGenerator ng, double chance) in NeighbourGeneratorGenerator.usageChance)
                 {
-                     neighbours.AddRange(tuple.ng.GenerateAll(state));
+                     neighbours.AddRange(ng.GenerateAll(state));
                 }
 
                 double bestNewScore = -1;
@@ -52,7 +52,7 @@ namespace AN_Project
                     }
                 }
 
-                if (i == 1000)
+                if (i == 100)
                 {
                     return bestTotalState;
                 }

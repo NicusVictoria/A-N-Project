@@ -15,7 +15,6 @@ namespace AN_Project
         /// <returns>A base solution for the search algorithms to use</returns>
         public static State Empty()
         {
-            // TODO: Implement
             int numberOfNodes = Program.inputGraph.Nodes.Count;
 
             State firstState = new State();
