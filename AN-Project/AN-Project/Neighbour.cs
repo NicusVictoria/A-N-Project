@@ -32,9 +32,9 @@ namespace AN_Project
     {
         private State state;
         private readonly State originalState;
-        private Node swapNode;
+        private TreeNode swapNode;
 
-        public SwapNeighbour(State state, Node swapNode)
+        public SwapNeighbour(State state, TreeNode swapNode)
         {
             this.state = state;
             this.swapNode = swapNode;

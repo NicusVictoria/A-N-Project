@@ -21,25 +21,25 @@ namespace AN_Project
 
             firstState.Tree = new Tree();
 
-            List<Node> nodes = new List<Node>();
+            List<TreeNode> nodes = new List<TreeNode>();
 
-            Node root = new Node();
+            TreeNode root = new TreeNode();
 
             root.Index = 0;
             root.depth = 1;
             firstState.Tree.Root = root;
             nodes.Add(root);
 
-            Node parent = root;
-            parent.Children = new List<Node>();
+            TreeNode parent = root;
+            parent.Children = new List<TreeNode>();
 
             for (int i = 1; i < numberOfNodes; i++)
             {
-                Node newNode = new Node();
+                TreeNode newNode = new TreeNode();
                 newNode.Index = i;
                 newNode.depth = i + 1;
                 newNode.Parent = parent;
-                newNode.Children = new List<Node>();
+                newNode.Children = new List<TreeNode>();
                 parent.Children.Add(newNode);
                 nodes.Add(newNode);
 

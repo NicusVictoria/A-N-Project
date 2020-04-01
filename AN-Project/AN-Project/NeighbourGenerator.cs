@@ -67,7 +67,7 @@ namespace AN_Project
         {
             List<Neighbour> generatedNeighbours = new List<Neighbour>(state.Tree.Nodes.Count - 1);
 
-            foreach (Node n in state.Tree.Nodes)
+            foreach (TreeNode n in state.Tree.Nodes)
             {
                 if (n == state.Tree.Root) continue;
 

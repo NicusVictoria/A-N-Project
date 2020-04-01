@@ -53,12 +53,12 @@ namespace AN_Project
     /// <summary>
     /// Implementation of a tree for TreeDepth algorithm; implements the ITree interface
     /// </summary>
-    public class Tree : ITree<Node>
+    public class Tree : ITree<TreeNode>
     {
         /// <summary>
         /// List of nodes in the tree
         /// </summary>
-        public List<Node> Nodes { get; set; }
+        public List<TreeNode> Nodes { get; set; }
         
         /// <summary>
         /// Scorekeeper
@@ -68,7 +68,7 @@ namespace AN_Project
         /// <summary>
         /// Root of the tree
         /// </summary>
-        public Node Root { get; set; }
+        public TreeNode Root { get; set; }
         
         /// <summary>
         /// The depth of the tree
@@ -83,7 +83,7 @@ namespace AN_Project
         /// <summary>
         /// List of nodes that are on the lowest level; not equal to the leaves.
         /// </summary>
-        public List<Node> LowestNodes { get; private set; }
+        public List<TreeNode> LowestNodes { get; private set; }
 
         public Tree()
         {
@@ -95,9 +95,9 @@ namespace AN_Project
         /// </summary>
         public void UpdateLowestNodes()
         {
-            LowestNodes = new List<Node>();
+            LowestNodes = new List<TreeNode>();
             
-            foreach (Node n in Nodes)
+            foreach (TreeNode n in Nodes)
             {
                 if (n.depth == Depth)
                 {
@@ -110,12 +110,12 @@ namespace AN_Project
         /// Swaps a node with its parents and moces all children of these nodes to the new lower node
         /// </summary>
         /// <param name="node">The node to be swapped with its parent</param>
-        public void SwapWithParent(State state, Node node)
+        public void SwapWithParent(State state, TreeNode node)
         {
             if (Root == node) throw new Exception("Cannot swap the root of the tree!");
 
             // Save the old parent for later use
-            Node parent = node.Parent;
+            TreeNode parent = node.Parent;
 
             parent.Children.Remove(node);
 
@@ -128,14 +128,14 @@ namespace AN_Project
             // Add all children of "node" to the parent
             parent.Children.AddRange(node.Children);
             
-            foreach (Node n in node.Children)
+            foreach (TreeNode n in node.Children)
             {
                 n.Parent = parent;
             }
 
 
             // The only child of the new upper node is its old parent
-            node.Children = new List<Node>{ parent };
+            node.Children = new List<TreeNode>{ parent };
             node.Parent = parent.Parent;
 
             // The swapped node is no child anymore of its old parent
@@ -169,7 +169,7 @@ namespace AN_Project
 
             for (int i = 0; i < Nodes.Count; i++)
             {
-                Node currentNode = Nodes[i];
+                TreeNode currentNode = Nodes[i];
 
                 if (currentNode == Root)
                 {
@@ -200,7 +200,7 @@ namespace AN_Project
     /// <summary>
     /// Implementation of a node for TreeDepth algorithm; implements the ITreeNode interface
     /// </summary>
-    public class Node : ITreeNode<Node>
+    public class TreeNode : ITreeNode<TreeNode>
     {
         /// <summary>
         /// The depth of this node
@@ -210,12 +210,12 @@ namespace AN_Project
         /// <summary>
         /// The list of children of this node
         /// </summary>
-        public List<Node> Children { get; set; }
+        public List<TreeNode> Children { get; set; }
 
         /// <summary>
         /// The parent of this node
         /// </summary>
-        public Node Parent { get; set; }
+        public TreeNode Parent { get; set; }
 
         /// <summary>
         /// The index of this node in the list of nodes in the tree
@@ -239,7 +239,7 @@ namespace AN_Project
             //scoreKeeper.CalculateNodeScore(state, this);
             
             // Recursive call to all children, also updates the maxDepth along the way
-            foreach(Node n in Children)
+            foreach(TreeNode n in Children)
             {
                 maxDepth = Math.Max(maxDepth, n.RecursivelyAdjustDepthAndScore(state, scoreKeeper, change));
             }

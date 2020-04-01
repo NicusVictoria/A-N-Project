@@ -2,7 +2,7 @@
 //%%      This class is copied from github according to an answer on StackOverflow.                       %%
 //%%      The code is available under the MIT licence.                                                    %%
 //%%                                                                                                      %%
-//%%      soruce: https://github.com/Burtsev-Alexey/net-object-deep-copy                                  %%
+//%%      source: https://github.com/Burtsev-Alexey/net-object-deep-copy                                  %%
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 using System;
