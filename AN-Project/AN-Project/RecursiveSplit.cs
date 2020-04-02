@@ -11,77 +11,100 @@ namespace AN_Project
         public RecursiveSplit(Node[] allNodes)
         {
             this.allNodes = allNodes;
-            
-            
         }
 
         public RecursiveTree<Node> GetHeuristicTree()
         {
-            return RecFun(allNodes.ToList(), new HashSet<Node>());
-            RecursiveTree<Node> RecFun(List<Node> Nodes, HashSet<Node> ancestors)
+            return RecGetHeuristicTree(allNodes.ToList(), new HashSet<Node>());
+        }
+
+        private RecursiveTree<Node> RecGetHeuristicTree(List<Node> Nodes, HashSet<Node> ancestors)
+        {
+            Node selectedNode = null;
+            int maxDegree = 0;
+            HashSet<Node> nodesAsHash = new HashSet<Node>(Nodes);
+            foreach (Node n in Nodes) //TODO implement heuristic instead of this (incorporate this in heuristic)
             {
-                Node selectedNode = null;
-                int maxDegree = 0;
-                HashSet<Node> nodesAsHash = new HashSet<Node>(Nodes);
-                foreach (Node n in Nodes) //TODO implement heuristic instead of this (incorporate this in heuristic)
+                int nRemainingDegree = n.RemainingDegree(nodesAsHash);
+                if (nRemainingDegree > maxDegree)
                 {
-                    int nRemainingDegree = n.RemainingDegree(nodesAsHash);
-                    if (nRemainingDegree > maxDegree)
-                    {
-                        maxDegree = nRemainingDegree;
-                        selectedNode = n;
-                    }
+                    maxDegree = nRemainingDegree;
+                    selectedNode = n;
                 }
-                //Node selectedNode = Nodes.Max(); 
-                RecursiveTree<Node> newTree = new RecursiveTree<Node>(selectedNode);
-                ancestors.Add(selectedNode);
-                HashSet<Node> beenList = new HashSet<Node>(ancestors);
-                foreach (Node n in Nodes)
-                {
-                    if (beenList.Contains(n)) continue;
-                    List<Node> connectedNodes = DFS.All(n, (n) => { return true; }, beenList);
-                    RecursiveTree<Node> ChildTree = RecFun(connectedNodes, new HashSet<Node>(ancestors));
-                    ChildTree.Parent = newTree;
-                    newTree.Children.Add(ChildTree);
-                }
-                return newTree;
             }
+            //Node selectedNode = Nodes.Max(); 
+            RecursiveTree<Node> newTree = new RecursiveTree<Node>(selectedNode);
+            ancestors.Add(selectedNode);
+            HashSet<Node> beenList = new HashSet<Node>(ancestors);
+            foreach (Node n in Nodes)
+            {
+                if (beenList.Contains(n)) continue;
+                List<Node> connectedNodes = DFS.All(n, (nn) => { return true; }, beenList);
+                RecursiveTree<Node> ChildTree = RecGetHeuristicTree(connectedNodes, new HashSet<Node>(ancestors));
+                ChildTree.Parent = newTree;
+                newTree.Children.Add(ChildTree);
+            }
+            return newTree;
         }
 
         public RecursiveTree<Node> GetBestTree()
         {
-            return RecFun(allNodes.ToList(), new HashSet<Node>());
+            return RecGetBestTree(allNodes.ToList(), new HashSet<Node>());
+        }
 
-            RecursiveTree<Node> RecFun(List<Node> Nodes, HashSet<Node> parents)
+        private RecursiveTree<Node> RecGetBestTree(List<Node> Nodes, HashSet<Node> parents)
+        {
+            HashSet<Node> nodesAsHash = new HashSet<Node>();
+            Nodes.OrderBy(n => n.RemainingDegree(nodesAsHash));
+            int bestDepth = allNodes.Length;
+            RecursiveTree<Node> bestTree = null;
+            foreach (Node selectedNode in Nodes)
             {
-                HashSet<Node> nodesAsHash = new HashSet<Node>();
-                Nodes.OrderBy(n => n.RemainingDegree(nodesAsHash));
-                int bestDepth = allNodes.Length;
-                RecursiveTree<Node> bestTree = null;
-                foreach (Node selectedNode in Nodes)
+                RecursiveTree<Node> newTree = new RecursiveTree<Node>(selectedNode);
+                HashSet<Node> beenList = new HashSet<Node>(parents);
+                beenList.Add(selectedNode);
+                foreach (Node n in Nodes)
                 {
-                    RecursiveTree<Node> newTree = new RecursiveTree<Node>(selectedNode);
-                    HashSet<Node> beenList = new HashSet<Node>(parents);
-                    beenList.Add(selectedNode);
-                    foreach (Node n in Nodes)
+                    if (beenList.Contains(n)) continue;
+                    List<Node> connectedNodes = DFS.All(n, (nn) => { return true; }, beenList);
+                    HashSet<Node> newHash = new HashSet<Node>(parents);
+                    newHash.Add(selectedNode);
+
+                    if (newTree.Children.Count > 0 && connectedNodes.Count < bestDepth)
                     {
-                        if (beenList.Contains(n)) continue;
-                        List<Node> connectedNodes = DFS.All(n, (n) => { return true; }, beenList);
-                        HashSet<Node> newHash = new HashSet<Node>(parents);
-                        newHash.Add(selectedNode);
-                        RecursiveTree<Node> ChildTree = RecFun(connectedNodes, newHash);
+                        RecursiveTree<Node> ChildTree = CreateLine(connectedNodes);
                         ChildTree.Parent = newTree;
                         newTree.Children.Add(ChildTree);
                     }
-                    int newDepth = newTree.Depth;
-                    if (newDepth < bestDepth)
+                    else
                     {
-                        bestDepth = newDepth;
-                        bestTree = newTree;
+                        RecursiveTree<Node> ChildTree = RecGetBestTree(connectedNodes, newHash);
+                        ChildTree.Parent = newTree;
+                        newTree.Children.Add(ChildTree);
                     }
                 }
-                return bestTree;
+                int newDepth = newTree.Depth;
+                if (newDepth < bestDepth)
+                {
+                    bestDepth = newDepth;
+                    bestTree = newTree;
+                }
             }
+            return bestTree;
+        }
+
+        private RecursiveTree<Node> CreateLine(List<Node> nodes)
+        {
+            RecursiveTree<Node> root = new RecursiveTree<Node>(nodes[0]);
+            RecursiveTree<Node> parent = root;
+            for (int i = 1; i < nodes.Count; i++)
+            {
+                RecursiveTree<Node> node = new RecursiveTree<Node>(nodes[i]);
+                node.Parent = parent;
+                parent.Children.Add(node);
+                parent = node;
+            }
+            return root;
         }
     }
 
@@ -144,8 +167,6 @@ namespace AN_Project
         public List<RecursiveTree<V>> Children { get; set; }
 
         public RecursiveTree<V> Parent { get; set; }
-
-        
     }
 
 

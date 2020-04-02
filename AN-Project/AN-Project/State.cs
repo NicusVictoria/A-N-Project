@@ -42,12 +42,12 @@ namespace AN_Project
         /// <summary>
         /// The root of the tree
         /// </summary>
-        public N Root { get; }
+        N Root { get; }
 
         /// <summary>
         /// The depth of the tree; the maximum depth a node in the tree has
         /// </summary>
-        public int Depth { get; }
+        int Depth { get; }
     }
 
     /// <summary>
