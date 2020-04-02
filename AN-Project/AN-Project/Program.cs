@@ -18,8 +18,24 @@ namespace AN_Project
         static void Main(string[] args)
         {
             Console.WriteLine("A&N project");
+            
+            string fileName = "heur_049";
+            Run(fileName);
+            
+            /*
+            for (int i = 1; i < 200; i += 2)
+            {
+                fileName = "heur_";
+                if (i < 100) fileName += "0";
+                if (i < 10) fileName += "0";
+                fileName += i;
+                Run(fileName);
+            }
+            //*/
 
-            string filepath = "..\\..\\..\\..\\..\\Testcases\\heur_049.gr";
+
+
+            //string filepath = $"..\\..\\..\\..\\..\\Testcases\\{fileName}.gr";
             //inputGraph = IO.ReadInput(filepath);
 
             //State initialState = BaseSolutionGenerator.Empty();
@@ -30,18 +46,36 @@ namespace AN_Project
 
             //string output = IO.WriteOutput(resultState);
 
-            Node[] inputAsNodes = IO.ReadInputAsNodes(filepath);
+            //Node[] inputAsNodes = IO.ReadInputAsNodes(filepath);
+            //RecursiveSplit recSplit = new RecursiveSplit(inputAsNodes);
+            //RecursiveTree<Node> recTree = recSplit.getHeuristicTree();
+            //string output = RecursiveTreePrinter.PrintTree(recTree);
+
+            //using (StreamWriter sw = new StreamWriter($"..\\..\\..\\..\\..\\Results\\{fileName}.tree", false))
+            //{
+            //    sw.Write(output);
+            //}
+
+            //Console.WriteLine("heuristic tree found with depth  " + recTree.Depth);
+            Console.Read();
+        }
+
+        private static void Run(string fileName)
+        {
+            Console.WriteLine($"Starting file {fileName}...");
+
+            Node[] inputAsNodes = IO.ReadInputAsNodes($"..\\..\\..\\..\\..\\Testcases\\{fileName}.gr");
             RecursiveSplit recSplit = new RecursiveSplit(inputAsNodes);
             RecursiveTree<Node> recTree = recSplit.getHeuristicTree();
             string output = RecursiveTreePrinter.PrintTree(recTree);
 
-            using (StreamWriter sw = new StreamWriter("..\\..\\..\\..\\..\\Results\\heur_049.tree", false))
+            using (StreamWriter sw = new StreamWriter($"..\\..\\..\\..\\..\\Results\\{fileName}.tree", false))
             {
                 sw.Write(output);
             }
 
-            Console.WriteLine("heuristic tree found with depth  " + recTree.Depth);
-            Console.Read();
+            Console.WriteLine($"Tree found with depth {recTree.Depth}.");
+            Console.WriteLine();
         }
     }
 }
