@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Text;
 
 namespace AN_Project
@@ -25,7 +26,7 @@ namespace AN_Project
         /// <summary>
         /// All nodes that are children of this node in the tree
         /// </summary>
-        List<T> Children { get; }
+        ReadOnlyCollection<T> Children { get; }
 
         /// <summary>
         /// The parent of this node in the tree
@@ -117,7 +118,7 @@ namespace AN_Project
             // Save the old parent for later use
             TreeNode parent = node.Parent;
 
-            parent.Children.Remove(node);
+            parent.ChildrenList.Remove(node);
 
             // Update the depth for the parent and all children of the parent
             Depth = Math.Max(Depth, parent.RecursivelyAdjustDepthAndScore(state, ScoreKeeper, 1));
@@ -126,7 +127,7 @@ namespace AN_Project
             node.depth -= 1;
 
             // Add all children of "node" to the parent
-            parent.Children.AddRange(node.Children);
+            parent.ChildrenList.AddRange(node.Children);
             
             foreach (TreeNode n in node.Children)
             {
@@ -135,14 +136,14 @@ namespace AN_Project
 
 
             // The only child of the new upper node is its old parent
-            node.Children = new List<TreeNode>{ parent };
+            node.ChildrenList = new List<TreeNode>{ parent };
             node.Parent = parent.Parent;
 
             // The swapped node is no child anymore of its old parent
             if (parent != Root)
             {
-                parent.Parent.Children.Remove(parent);
-                parent.Parent.Children.Add(node);
+                parent.Parent.ChildrenList.Remove(parent);
+                parent.Parent.ChildrenList.Add(node);
             }
             parent.Parent = node;
 
@@ -210,7 +211,7 @@ namespace AN_Project
         /// <summary>
         /// The list of children of this node
         /// </summary>
-        public List<TreeNode> Children { get; set; }
+        public List<TreeNode> ChildrenList { get; set; }
 
         /// <summary>
         /// The parent of this node
@@ -225,6 +226,8 @@ namespace AN_Project
         public double DegreeScore { get; set; }
         
         public double DistanceScore { get; set; }
+
+        public ReadOnlyCollection<TreeNode> Children => new ReadOnlyCollection<TreeNode>(ChildrenList);
 
         /// <summary>
         /// Recursively adjusts the depth of this node and all its children

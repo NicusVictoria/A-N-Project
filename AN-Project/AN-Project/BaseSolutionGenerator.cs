@@ -31,7 +31,7 @@ namespace AN_Project
             nodes.Add(root);
 
             TreeNode parent = root;
-            parent.Children = new List<TreeNode>();
+            parent.ChildrenList = new List<TreeNode>();
 
             for (int i = 1; i < numberOfNodes; i++)
             {
@@ -39,8 +39,8 @@ namespace AN_Project
                 newNode.Index = i;
                 newNode.depth = i + 1;
                 newNode.Parent = parent;
-                newNode.Children = new List<TreeNode>();
-                parent.Children.Add(newNode);
+                newNode.ChildrenList = new List<TreeNode>();
+                parent.ChildrenList.Add(newNode);
                 nodes.Add(newNode);
 
                 parent = newNode;
