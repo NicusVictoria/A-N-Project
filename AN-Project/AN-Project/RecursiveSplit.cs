@@ -162,7 +162,7 @@ namespace AN_Project
 
         public int Degree { get { return ConnectedNodes.Count; } }
 
-        public int RemainingDegree(HashSet<Node> subGraph) => ConnectedNodes.Count(n => !subGraph.Contains(n));
+        public int RemainingDegree(HashSet<Node> subGraph) => ConnectedNodes.Count(n => subGraph.Contains(n));
 
         public double Heuristic { get { return Degree; } } //TODO improve this
 

@@ -18,7 +18,7 @@ namespace AN_Project
         {
             Console.WriteLine("A&N project");
 
-            string filepath = "..\\..\\..\\..\\..\\Testcases\\exact_003.gr";
+            string filepath = "..\\..\\..\\..\\..\\Testcases\\heur_001.gr";
             //inputGraph = IO.ReadInput(filepath);
 
             //State initialState = BaseSolutionGenerator.Empty();
@@ -31,7 +31,7 @@ namespace AN_Project
 
             Node[] inputAsNodes = IO.ReadInputAsNodes(filepath);
             RecursiveSplit recSplit = new RecursiveSplit(inputAsNodes);
-            RecursiveTree<Node> recTree = recSplit.getBestTree();
+            RecursiveTree<Node> recTree = recSplit.getHeuristicTree();
             string output = RecursiveTreePrinter.PrintTree(recTree);
             Console.WriteLine("heuristic tree found with depth  " + recTree.Depth);
             Console.Read();
