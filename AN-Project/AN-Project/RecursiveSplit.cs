@@ -18,12 +18,12 @@ namespace AN_Project
         public RecursiveTree<Node> getHeuristicTree()
         {
             return RecFun(allNodes.ToList(), new HashSet<Node>());
-            RecursiveTree<Node> RecFun(List<Node> Nodes, HashSet<Node> parents)
+            RecursiveTree<Node> RecFun(List<Node> Nodes, HashSet<Node> ancestors)
             {
                 Node selectedNode = null;
                 int maxDegree = 0;
-                HashSet<Node> nodesAsHash = new HashSet<Node>();
-                foreach(Node n in Nodes)
+                HashSet<Node> nodesAsHash = new HashSet<Node>(Nodes);
+                foreach (Node n in Nodes) //TODO implement heuristic instead of this (incorporate this in heuristic)
                 {
                     int nRemainingDegree = n.RemainingDegree(nodesAsHash);
                     if (nRemainingDegree > maxDegree)
@@ -32,14 +32,15 @@ namespace AN_Project
                         selectedNode = n;
                     }
                 }
+                //Node selectedNode = Nodes.Max(); 
                 RecursiveTree<Node> newTree = new RecursiveTree<Node>(selectedNode);
-                parents.Add(selectedNode);
-                HashSet<Node> beenList = new HashSet<Node>(parents);
+                ancestors.Add(selectedNode);
+                HashSet<Node> beenList = new HashSet<Node>(ancestors);
                 foreach (Node n in Nodes)
                 {
                     if (beenList.Contains(n)) continue;
                     List<Node> connectedNodes = DFS.All(n, (n) => { return true; }, beenList);
-                    RecursiveTree<Node> ChildTree = RecFun(connectedNodes, new HashSet<Node>(parents));
+                    RecursiveTree<Node> ChildTree = RecFun(connectedNodes, new HashSet<Node>(ancestors));
                     ChildTree.Parent = newTree;
                     newTree.Children.Add(ChildTree);
                 }
@@ -88,29 +89,37 @@ namespace AN_Project
     {
         public static string PrintTree(RecursiveTree<Node> tree)
         {
+            int[] nodeArray = new int[tree.NumberOfNodes];
+
+            nodeArray[tree.value.Number - 1] = 0;
+
+            foreach (RecursiveTree <Node> subTree in tree.Children)
+            {
+                PrintTree(subTree, nodeArray);
+            }
+
+
             StringBuilder stringBuilder = new StringBuilder();
 
             stringBuilder.Append(tree.Depth);
             stringBuilder.Append("\n");
 
-            stringBuilder.Append("0");
-
-            foreach (RecursiveTree <Node> subTree in tree.Children)
+            for (int i = 0; i < nodeArray.Length; i++)
             {
-                PrintTree(subTree, stringBuilder);
+                stringBuilder.Append(nodeArray[i]);
+                stringBuilder.Append("\n");
             }
 
             return stringBuilder.ToString();
         }
 
-        static void PrintTree(RecursiveTree<Node> tree, StringBuilder stringBuilder)
+        static void PrintTree(RecursiveTree<Node> tree, int[] nodeArray)
         {
-            stringBuilder.Append(tree.Parent.value.Number);
-            stringBuilder.Append("\n");
+            nodeArray[tree.value.Number - 1] = tree.Parent.value.Number;
 
             foreach (RecursiveTree<Node> subTree in tree.Children)
             {
-                PrintTree(subTree, stringBuilder);
+                PrintTree(subTree, nodeArray);
             }
         }
     }
@@ -130,7 +139,7 @@ namespace AN_Project
 
         public int Depth => (Children.Max(c => (int?)c.Depth) ?? 0) + 1;
 
-        public int NumberOfNodes => Children.Sum(c => c.NumberOfNodes + 1);
+        public int NumberOfNodes => Children.Sum(c => c.NumberOfNodes) + 1;
 
         public List<RecursiveTree<V>> Children { get; set; }
 
@@ -162,7 +171,7 @@ namespace AN_Project
 
         public int Degree { get { return ConnectedNodes.Count; } }
 
-        public int RemainingDegree(HashSet<Node> subGraph) => ConnectedNodes.Count(n => subGraph.Contains(n));
+        public int RemainingDegree(HashSet<Node> subGraph) => ConnectedNodes.Select(n => !subGraph.Contains(n)).Count();
 
         public double Heuristic { get { return Degree; } } //TODO improve this
 
@@ -218,6 +227,10 @@ namespace AN_Project
                 if (targetSelection(node)) retList.Add(node);
                 foreach (N n in node.ConnectedNodes)
                 {
+                    //if (!beenList.Contains(n))
+                    //{
+                    //    beenList.Add(n);
+                    //}
                     stack.Push(n);
                 }
             }
