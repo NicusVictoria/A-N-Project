@@ -59,7 +59,6 @@ namespace AN_Project
 
         public static Node[] ReadInputAsNodes(String path)
         {
-
             int numberOfNodes;
             int numberOfEdges;
             Node[] allNodes = new Node[0];
@@ -116,8 +115,12 @@ namespace AN_Project
 
             // Read a line while possible
             string line;
-            while ((line = Console.ReadLine()) != null)
+            int counter = 0;
+            int maxCounter = 1;     // Starts at one because the number of edges is unknown; this is known before the first edge is read, so before counter is incremented
+            while (counter < maxCounter)
             {
+                line = Console.ReadLine();
+
                 // Split the line
                 string[] splittedLine = line.Split();
 
@@ -133,11 +136,15 @@ namespace AN_Project
                     numberOfNodes = int.Parse(splittedLine[2]);
                     numberOfEdges = int.Parse(splittedLine[3]);
 
+                    maxCounter = numberOfEdges;
+
                     graph = new UndirectedGraph(numberOfNodes);
                 }
                 // Else the line contains information about an edge, so add this edge to the graph
                 else
                 {
+                    counter++;
+
                     int origin = int.Parse(splittedLine[0]);
                     int destination = int.Parse(splittedLine[1]);
 
@@ -146,6 +153,60 @@ namespace AN_Project
             }
 
             return graph;
+        }
+
+        public static Node[] ReadInputAsNodes()
+        {
+            int numberOfNodes;
+            int numberOfEdges;
+            Node[] allNodes = new Node[0];
+
+            // Read a line while possible
+            string line;
+            int counter = 0;
+            int maxCounter = 1;     // Starts at one because the number of edges is unknown; this is known before the first edge is read, so before counter is incremented
+            while (counter < maxCounter)
+            {
+                line = Console.ReadLine();
+
+                // Split the line
+                string[] splittedLine = line.Split();
+
+                // If the line is a comment, continue
+                if (splittedLine[0] == "c")
+                {
+                    continue;
+                }
+
+                // If the line contains the information about the nodes and edges, save these and create an empty graph
+                if (splittedLine[0] == "p")
+                {
+                    numberOfNodes = int.Parse(splittedLine[2]);
+                    numberOfEdges = int.Parse(splittedLine[3]);
+
+                    maxCounter = numberOfEdges;
+
+                    allNodes = new Node[numberOfNodes];
+                    for (int i = 0; i < numberOfNodes; i++)
+                    {
+                        allNodes[i] = new Node(i + 1);
+                        allNodes[i].ConnectedNodes = new List<Node>();
+                    }
+                }
+                // Else the line contains information about an edge, so add this edge to the graph
+                else
+                {
+                    counter++;
+
+                    int origin = int.Parse(splittedLine[0]) - 1;
+                    int destination = int.Parse(splittedLine[1]) - 1;
+
+                    allNodes[origin].ConnectedNodes.Add(allNodes[destination]);
+                    allNodes[destination].ConnectedNodes.Add(allNodes[origin]);
+                }
+            }
+
+            return allNodes;
         }
 
         public static string WriteOutput(State finalState)

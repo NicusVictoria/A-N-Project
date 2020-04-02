@@ -15,7 +15,7 @@ namespace AN_Project
             
         }
 
-        public RecursiveTree<Node> getHeuristicTree()
+        public RecursiveTree<Node> GetHeuristicTree()
         {
             return RecFun(allNodes.ToList(), new HashSet<Node>());
             RecursiveTree<Node> RecFun(List<Node> Nodes, HashSet<Node> ancestors)
@@ -48,7 +48,7 @@ namespace AN_Project
             }
         }
 
-        public RecursiveTree<Node> getBestTree()
+        public RecursiveTree<Node> GetBestTree()
         {
             return RecFun(allNodes.ToList(), new HashSet<Node>());
 
@@ -167,6 +167,7 @@ namespace AN_Project
         }
 
         public int Number { get; private set; }
+
         public List<Node> ConnectedNodes { get; set; }
 
         public int Degree { get { return ConnectedNodes.Count; } }
@@ -178,6 +179,11 @@ namespace AN_Project
         int IComparable<Node>.CompareTo(Node other)
         {
             return Heuristic.CompareTo(other.Heuristic); 
+        }
+
+        public override string ToString()
+        {
+            return Number.ToString();
         }
     }
 
