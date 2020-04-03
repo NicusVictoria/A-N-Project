@@ -50,9 +50,9 @@ namespace AN_Project
                 neighBoursPreviousLevel[i] = new List<Node>();
             }
             RecursiveTree<Node>[] treesFromNodes = new RecursiveTree<Node>[graph.Count];
-            List<Node> newNodes;
+            List<Node> newNodes = graph;
 
-            while (true)
+            while (newNodes.Count > 1)
             {
 
                 newNodes = new List<Node>(graph.Count - independentSet.Count);
@@ -102,6 +102,7 @@ namespace AN_Project
 
                 independentSet = CalculateMaximum(newNodes);
             }
+            return treesFromNodes[newNodes[0].Number];
 
 
         }
