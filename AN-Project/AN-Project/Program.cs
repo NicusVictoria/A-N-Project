@@ -25,8 +25,8 @@ namespace AN_Project
             RunExactConsole();
             //*/
 
-            /*
-            string fileName = "exact_001";
+            
+            string fileName = "exact_003";
             Run(fileName, false);
             //*/
 
@@ -34,7 +34,7 @@ namespace AN_Project
             RunAllHeuristic();
             //*/
             
-            
+            /*
             RunAllExact();
             //*/
         }

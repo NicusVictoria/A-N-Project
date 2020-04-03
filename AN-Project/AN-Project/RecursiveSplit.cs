@@ -84,12 +84,12 @@ namespace AN_Project
         public RecursiveTree<Node> GetBestTree()
         {
             int bestFoundSolution = allNodes.Length + 1;
-            Dictionary<(BigInteger, int), RecursiveTree<Node>> checkedSubsets = new Dictionary<(BigInteger, int), RecursiveTree<Node>>();
+            Dictionary<Tuple<BigInteger, int>, RecursiveTree<Node>> checkedSubsets = new Dictionary<Tuple<BigInteger, int>, RecursiveTree<Node>>();
 
             return RecGetBestTree(bestFoundSolution, allNodes.ToList(), new HashSet<Node>(), checkedSubsets);
         }
 
-        private RecursiveTree<Node> RecGetBestTree(int bestFoundSolution, List<Node> Nodes, HashSet<Node> parents, Dictionary<(BigInteger, int), RecursiveTree<Node>> checkedSubsets)
+        private RecursiveTree<Node> RecGetBestTree(int bestFoundSolution, List<Node> Nodes, HashSet<Node> parents, Dictionary<Tuple<BigInteger, int>, RecursiveTree<Node>> checkedSubsets)
         {
             // BESTFOUNDSOLUTION IS HOEVEEL ONDER DIT NIVEAU HET GELIJK ZOU ZIJN AAN DE MINIMAAL GEVONDEN DEPTH
 
@@ -106,7 +106,7 @@ namespace AN_Project
             foreach (Node selectedNode in Nodes)
             {
                 BigInteger asBits = NodeSubsetRepresentation(Nodes, selectedNode.Number);
-                (BigInteger, int) key = (asBits, selectedNode.Number);
+                Tuple<BigInteger, int> key = Tuple.Create(asBits, selectedNode.Number);
                 if (checkedSubsets.ContainsKey(key) && checkedSubsets[key] != null)
                 {
                     RecursiveTree<Node> orphan = new RecursiveTree<Node>(checkedSubsets[key]);
@@ -151,7 +151,7 @@ namespace AN_Project
                 }
                 if (!broken)
                 {
-                    checkedSubsets[(asBits, selectedNode.Number)] = newTree;
+                    checkedSubsets[Tuple.Create(asBits, selectedNode.Number)] = newTree;
                     int newDepth = newTree.Depth;
                     if (newDepth + parents.Count < bestFoundSolution)
                     {
