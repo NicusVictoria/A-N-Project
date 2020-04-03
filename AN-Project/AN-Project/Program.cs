@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 
 namespace AN_Project
 {
@@ -26,8 +27,9 @@ namespace AN_Project
             //*/
 
             
-            string fileName = "exact_009";
-            Run(fileName, false);
+            string fileName = "exact_001";
+            RunIndependentSet(fileName);
+            //Run(fileName, false);
             //*/
 
             /*
@@ -55,6 +57,25 @@ namespace AN_Project
             {
                 recTree = recSplit.GetBestTree();
             }
+            
+            string output = IO.PrintTree(recTree);
+
+            using (StreamWriter sw = new StreamWriter($"..\\..\\..\\..\\..\\Results\\{fileName}.tree", false))
+            {
+                sw.Write(output);
+            }
+
+            Console.WriteLine($"Tree found with depth {recTree.Depth}.");
+            Console.WriteLine();
+        }
+        
+        private static void RunIndependentSet(string fileName)
+        {
+            Console.WriteLine($"Starting file {fileName}...");
+
+            Node[] inputAsNodes = IO.ReadInputAsNodes($"..\\..\\..\\..\\..\\Testcases\\{fileName}.gr");
+
+            RecursiveTree<Node> recTree = IndependentSet.TreeFromIndependentSets(inputAsNodes.ToList());
             
             string output = IO.PrintTree(recTree);
 
