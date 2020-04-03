@@ -41,20 +41,22 @@ namespace AN_Project
             List<N> retList = new List<N>();
             Stack<N> stack = new Stack<N>();
             if (beenList == null) beenList = new HashSet<N>();
+            beenList.Add(startNode);
             stack.Push(startNode);
             while (stack.Count != 0)
             {
                 N node = stack.Pop();
-                if (beenList.Contains(node)) continue;
-                beenList.Add(node);
+                //if (beenList.Contains(node)) continue;
+                //beenList.Add(node);
                 if (targetSelection(node)) retList.Add(node);
                 foreach (N n in node.ConnectedNodes)
                 {
-                    //if (!beenList.Contains(n))
-                    //{
-                    //    beenList.Add(n);
-                    //}
-                    stack.Push(n);
+                    if (!beenList.Contains(n))
+                    {
+                        stack.Push(n);
+                        beenList.Add(n);
+                    }
+                    
                 }
             }
             return retList;

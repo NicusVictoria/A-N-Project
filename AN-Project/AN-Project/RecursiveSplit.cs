@@ -11,7 +11,8 @@ namespace AN_Project
     class RecursiveSplit
     {
         private readonly Node[] allNodes;
-
+        int addedToDict = 0;
+        int gottenFromDict = 0;
         public RecursiveSplit(Node[] allNodes)
         {
             this.allNodes = allNodes;
@@ -61,14 +62,14 @@ namespace AN_Project
         /// <param name="nodes">The nodes to be represented as bitstring</param>
         /// <param name="nodeNumber">The node that is split on</param>
         /// <returns>A BigInteger containing the "value" for this set of nodes</returns>
-        private string NodeSubsetRepresentation(List<Node> nodes, int nodeNumber)
+        private string NodeSubsetRepresentation(List<Node> nodes)
         {
             // TODO: nodenumber wordt nu niet gebruikt, is dat ook de bedoeling?
 
             byte[] bytes = new byte[(int)Math.Ceiling(allNodes.Length / 8f)];
             for (int i = 0; i < nodes.Count; i++)
             {
-                if (i == nodeNumber) continue;
+                //if (i == nodeNumber) continue;
                 int bitIndex = nodes[i].Number - 1;
                 int byteIndex = bitIndex / 8;
                 byte bitInByteIndex = (byte)(bitIndex % 8);
@@ -76,10 +77,21 @@ namespace AN_Project
             }
 
             // TODO: fix this. It is very fast (with most encodings), however, the program loses nodes when this is used.
-            /*
-            string encodedString = Encoding.UTF8.GetString(bytes, 0, bytes.Length);
+
+            //string encodedString = Encoding.UTF8.GetString(bytes, 0, bytes.Length);
+            //byte[] check = Encoding.UTF8.GetBytes(encodedString);
+            //return encodedString;
+            //return BitConverter.ToString(bytes);
+            //return bytes.ToString();
+
+
+            string encodedString = Convert.ToBase64String(bytes);
+            //byte[] test = Convert.FromBase64String(encodedString);
+            //if (!test.SequenceEqual(bytes))
+            //{
+            //}
             return encodedString;
-            */
+
 
             StringBuilder sb = new StringBuilder();
             for (int i = 0; i < bytes.Length; i++)
@@ -97,18 +109,26 @@ namespace AN_Project
         public RecursiveTree<Node> GetBestTree()
         {
             int bestFoundSolution = allNodes.Length + 1;
-            Dictionary<Tuple<string, int>, RecursiveTree<Node>> checkedSubsets = new Dictionary<Tuple<string, int>, RecursiveTree<Node>>();
+            Dictionary<string, RecursiveTree<Node>> checkedSubsets = new Dictionary<string, RecursiveTree<Node>>();
 
             return RecGetBestTree(bestFoundSolution, allNodes.ToList(), new HashSet<Node>(), checkedSubsets);
         }
 
-        private RecursiveTree<Node> RecGetBestTree(int bestFoundSolution, List<Node> Nodes, HashSet<Node> parents, Dictionary<Tuple<string, int>, RecursiveTree<Node>> checkedSubsets)
+        private RecursiveTree<Node> RecGetBestTree(int bestFoundSolution, List<Node> Nodes, HashSet<Node> parents, Dictionary<string, RecursiveTree<Node>> checkedSubsets)
         {
             // BESTFOUNDSOLUTION IS HOEVEEL ONDER DIT NIVEAU HET GELIJK ZOU ZIJN AAN DE MINIMAAL GEVONDEN DEPTH
 
-            if (bestFoundSolution < 1/*Nodes.Min(n => n.RemainingDegree(nodesAsHash))*/) //TODO not entirely sure if correct
+            if (bestFoundSolution < parents.Count + 1/*Nodes.Min(n => n.RemainingDegree(nodesAsHash))*/) //TODO not entirely sure if correct
             {
                 return null;
+            }
+
+            string asBits = NodeSubsetRepresentation(Nodes);
+            if (checkedSubsets.ContainsKey(asBits) && checkedSubsets[asBits] != null)
+            {
+                RecursiveTree<Node> orphan = new RecursiveTree<Node>(checkedSubsets[asBits]);
+                gottenFromDict++;
+                return orphan;
             }
 
             //bestFoundSolution = allNodes.Length+ 1; // TODO: AAAAAAAAH, remove
@@ -118,15 +138,9 @@ namespace AN_Project
             RecursiveTree<Node> bestTree = null;
             foreach (Node selectedNode in Nodes)
             {
-                string asBits = NodeSubsetRepresentation(Nodes, selectedNode.Number);
-                Tuple<string, int> key = Tuple.Create(asBits, selectedNode.Number);
-                if (checkedSubsets.ContainsKey(key) && checkedSubsets[key] != null)
-                {
-                    RecursiveTree<Node> orphan = new RecursiveTree<Node>(checkedSubsets[key]);
-                    return orphan;
-                }
-
                 RecursiveTree<Node> newTree = new RecursiveTree<Node>(selectedNode);
+
+
                 HashSet<Node> beenList = new HashSet<Node>(parents)
                 {
                     selectedNode
@@ -164,7 +178,6 @@ namespace AN_Project
                 }
                 if (!broken)
                 {
-                    checkedSubsets[Tuple.Create(asBits, selectedNode.Number)] = newTree;
                     int newDepth = newTree.Depth;
                     if (newDepth + parents.Count < bestFoundSolution)
                     {
@@ -173,6 +186,8 @@ namespace AN_Project
                     }
                 }
             }
+            checkedSubsets[asBits] = bestTree;
+            addedToDict++;
             return bestTree;
         }
 
