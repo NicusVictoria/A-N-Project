@@ -17,8 +17,6 @@ namespace AN_Project
 
         static void Main(string[] args)
         {
-            //Console.WriteLine("A&N project");
-
             /*
             RunHeuristicConsole();
             //*/
@@ -27,48 +25,18 @@ namespace AN_Project
             RunExactConsole();
             //*/
 
-            
+            /*
             string fileName = "exact_001";
             Run(fileName, false);
             //*/
 
-
             /*
-            for (int i = 1; i < 200; i += 2)
-            {
-                string file = "exact_";
-                if (i < 10) file += $"00{i}";
-                else if (i < 100) file += $"0{i}";
-                else file += i;
-                Run(file, true);
-            }
+            RunAllHeuristic();
             //*/
-
-
-
-            //string filepath = $"..\\..\\..\\..\\..\\Testcases\\{fileName}.gr";
-            //inputGraph = IO.ReadInput(filepath);
-
-            //State initialState = BaseSolutionGenerator.Empty();
-            //string initialOutput = IO.WriteOutput(initialState);
-
-            //TabuSearcher tabuSearcher = new TabuSearcher();
-            //State resultState = tabuSearcher.Search();
-
-            //string output = IO.WriteOutput(resultState);
-
-            //Node[] inputAsNodes = IO.ReadInputAsNodes(filepath);
-            //RecursiveSplit recSplit = new RecursiveSplit(inputAsNodes);
-            //RecursiveTree<Node> recTree = recSplit.getHeuristicTree();
-            //string output = RecursiveTreePrinter.PrintTree(recTree);
-
-            //using (StreamWriter sw = new StreamWriter($"..\\..\\..\\..\\..\\Results\\{fileName}.tree", false))
-            //{
-            //    sw.Write(output);
-            //}
-
-            //Console.WriteLine("heuristic tree found with depth  " + recTree.Depth);
-            //Console.Read();
+            
+            
+            RunAllExact();
+            //*/
         }
 
         private static void Run(string fileName, bool heuristic = true)
@@ -88,7 +56,7 @@ namespace AN_Project
                 recTree = recSplit.GetBestTree();
             }
             
-            string output = RecursiveTreePrinter.PrintTree(recTree);
+            string output = IO.PrintTree(recTree);
 
             using (StreamWriter sw = new StreamWriter($"..\\..\\..\\..\\..\\Results\\{fileName}.tree", false))
             {
@@ -104,7 +72,7 @@ namespace AN_Project
             Node[] inputAsNodes = IO.ReadInputAsNodes();
             RecursiveSplit recSplit = new RecursiveSplit(inputAsNodes);
             RecursiveTree<Node> recTree = recSplit.GetHeuristicTree();
-            string output = RecursiveTreePrinter.PrintTree(recTree);
+            string output = IO.PrintTree(recTree);
             Console.Write(output);
         }
         
@@ -113,8 +81,32 @@ namespace AN_Project
             Node[] inputAsNodes = IO.ReadInputAsNodes();
             RecursiveSplit recSplit = new RecursiveSplit(inputAsNodes);
             RecursiveTree<Node> recTree = recSplit.GetBestTree();
-            string output = RecursiveTreePrinter.PrintTree(recTree);
+            string output = IO.PrintTree(recTree);
             Console.Write(output);
+        }
+
+        private static void RunAllHeuristic()
+        {
+            for (int i = 1; i < 200; i += 2)
+            {
+                string file = "heur_";
+                if (i < 10) file += $"00{i}";
+                else if (i < 100) file += $"0{i}";
+                else file += i;
+                Run(file, true);
+            }
+        }
+
+        private static void RunAllExact()
+        {
+            for (int i = 1; i < 200; i += 2)
+            {
+                string file = "exact_";
+                if (i < 10) file += $"00{i}";
+                else if (i < 100) file += $"0{i}";
+                else file += i;
+                Run(file, false);
+            }
         }
     }
 }

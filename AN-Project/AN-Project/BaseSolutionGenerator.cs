@@ -17,16 +17,19 @@ namespace AN_Project
         {
             int numberOfNodes = Program.inputGraph.Nodes.Count;
 
-            State firstState = new State();
-
-            firstState.Tree = new Tree();
+            State firstState = new State()
+            {
+                Tree = new Tree()
+            };
 
             List<TreeNode> nodes = new List<TreeNode>();
 
-            TreeNode root = new TreeNode();
+            TreeNode root = new TreeNode()
+            {
+                Index = 0,
+                depth = 1
+            };
 
-            root.Index = 0;
-            root.depth = 1;
             firstState.Tree.Root = root;
             nodes.Add(root);
 
@@ -35,11 +38,13 @@ namespace AN_Project
 
             for (int i = 1; i < numberOfNodes; i++)
             {
-                TreeNode newNode = new TreeNode();
-                newNode.Index = i;
-                newNode.depth = i + 1;
-                newNode.Parent = parent;
-                newNode.ChildrenList = new List<TreeNode>();
+                TreeNode newNode = new TreeNode()
+                {
+                    Index = i,
+                    depth = i + 1,
+                    Parent = parent,
+                    ChildrenList = new List<TreeNode>()
+                };
                 parent.ChildrenList.Add(newNode);
                 nodes.Add(newNode);
 

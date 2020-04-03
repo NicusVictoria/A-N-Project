@@ -6,24 +6,23 @@ namespace AN_Project
 {
     public class ScoreKeeper
     {
-        private double depthWeight = 0.80;
-        private double degreeWeight = 0.10;
-        private double distanceWeight = 0.10;
+        private const double DEPTHWEIGHT = 0.80;
+        private const double DEGREEWEIGHT = 0.10;
+        private const double DISTANCEWEIGHT = 0.10;
 
         public double CurrentScore { get; private set; }
 
         public ScoreKeeper()
         {
+
         }
-
-
 
         public void CalculateTreeScore(State state)
         {
             double depthScore = CalculateDepthScore(state);
             //(double degreeScore, double distanceScore) = CalculateDegreeAndDistanceScore(state);
 
-            CurrentScore = depthScore * depthWeight /*+ degreeScore * degreeWeight + distanceScore * distanceWeight*/;
+            CurrentScore = depthScore * DEPTHWEIGHT /*+ degreeScore * DEGREEWEIGHT + distanceScore * DISTANCEWEIGHT*/;
         }
 
         /*
@@ -41,7 +40,7 @@ namespace AN_Project
             deltaDeg /= state.Tree.Nodes.Count;
             deltaDist /= state.Tree.Nodes.Count;
 
-            CurrentScore += deltaDeg * degreeWeight - deltaDist * distanceWeight; // TODO: We have also assumed this works for now :), but deep inside we know it won't work :'(((
+            CurrentScore += deltaDeg * DEGREEWEIGHT - deltaDist * DISTANCEWEIGHT; // TODO: We have also assumed this works for now :), but deep inside we know it won't work :'(((
         }
         //*/
 

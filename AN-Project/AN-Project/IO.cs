@@ -57,7 +57,7 @@ namespace AN_Project
             return graph;
         }
 
-        public static Node[] ReadInputAsNodes(String path)
+        public static Node[] ReadInputAsNodes(string path)
         {
             int numberOfNodes;
             int numberOfEdges;
@@ -87,8 +87,10 @@ namespace AN_Project
                         allNodes = new Node[numberOfNodes];
                         for(int i = 0; i < numberOfNodes; i++)
                         {
-                            allNodes[i] = new Node(i + 1);
-                            allNodes[i].ConnectedNodes = new List<Node>();
+                            allNodes[i] = new Node(i + 1)
+                            {
+                                ConnectedNodes = new List<Node>(),
+                            };
                         }
                     }
                     // Else the line contains information about an edge, so add this edge to the graph
@@ -189,8 +191,10 @@ namespace AN_Project
                     allNodes = new Node[numberOfNodes];
                     for (int i = 0; i < numberOfNodes; i++)
                     {
-                        allNodes[i] = new Node(i + 1);
-                        allNodes[i].ConnectedNodes = new List<Node>();
+                        allNodes[i] = new Node(i + 1)
+                        {
+                            ConnectedNodes = new List<Node>()
+                        };
                     }
                 }
                 // Else the line contains information about an edge, so add this edge to the graph
@@ -212,6 +216,42 @@ namespace AN_Project
         public static string WriteOutput(State finalState)
         {
             return finalState.Tree.ToString();
+        }
+
+        public static string PrintTree(RecursiveTree<Node> tree)
+        {
+            int[] nodeArray = new int[tree.NumberOfNodes];
+
+            nodeArray[tree.Value.Number - 1] = 0;
+
+            foreach (RecursiveTree<Node> subTree in tree.Children)
+            {
+                PrintTree(subTree, nodeArray);
+            }
+
+
+            StringBuilder stringBuilder = new StringBuilder();
+
+            stringBuilder.Append(tree.Depth);
+            stringBuilder.Append("\n");
+
+            for (int i = 0; i < nodeArray.Length; i++)
+            {
+                stringBuilder.Append(nodeArray[i]);
+                stringBuilder.Append("\n");
+            }
+
+            return stringBuilder.ToString();
+        }
+
+        public static void PrintTree(RecursiveTree<Node> tree, int[] nodeArray)
+        {
+            nodeArray[tree.Value.Number - 1] = tree.Parent.Value.Number;
+
+            foreach (RecursiveTree<Node> subTree in tree.Children)
+            {
+                PrintTree(subTree, nodeArray);
+            }
         }
     }
 }
