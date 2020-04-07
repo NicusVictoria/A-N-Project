@@ -34,7 +34,7 @@ namespace AN_Project
         /// <summary>
         /// The list of children of this node
         /// </summary>
-        public List<TreeNode> ChildrenList { get; set; }
+        private List<TreeNode> ChildrenList { get; set; }
 
         /// <summary>
         /// The parent of this node
@@ -51,6 +51,11 @@ namespace AN_Project
         public double DistanceScore { get; set; }
 
         public ReadOnlyCollection<TreeNode> Children => new ReadOnlyCollection<TreeNode>(ChildrenList);
+
+        public TreeNode()
+        {
+            ChildrenList = new List<TreeNode>();
+        }
 
         /// <summary>
         /// Recursively adjusts the depth of this node and all its children
@@ -72,6 +77,39 @@ namespace AN_Project
 
             return maxDepth;
         }
-    }
 
+        /// <summary>
+        /// Add a child to the children of this tree
+        /// </summary>
+        /// <param name="child">The child to be added</param>
+        public void AddChild(TreeNode child)
+        {
+            ChildrenList.Add(child);
+        }
+
+        /// <summary>
+        /// Add multiple children to this tree
+        /// </summary>
+        /// <param name="children">The list of children to be added</param>
+        public void AddChildren(IEnumerable<TreeNode> children)
+        {
+            ChildrenList.AddRange(children);
+        }
+
+        public void RemoveChild(TreeNode child)
+        {
+            try { ChildrenList.Remove(child); }
+            catch { throw new Exception("Node is not a child!"); }
+        }
+
+        public void EmptyChildrenList()
+        {
+            ChildrenList = new List<TreeNode>();
+        }
+
+        public override string ToString()
+        {
+            return Index.ToString();
+        }
+    }
 }

@@ -8,12 +8,20 @@ using System.Collections;
 
 namespace AN_Project
 {
-    class RecursiveTree<V> : ITree<RecursiveTree<V>>, ITreeNode<RecursiveTree<V>>
+    public class RecursiveTree<V> : ITree<RecursiveTree<V>>, ITreeNode<RecursiveTree<V>>
     {
         private int depth;
         private bool depthCalculated;
 
+        public RecursiveTree()
+        {
+            ScoreKeeper = new ScoreKeeper();
+            ChildrenList = new List<RecursiveTree<V>>();
+        }
+
         private List<RecursiveTree<V>> ChildrenList { get; set; }
+
+        public ScoreKeeper ScoreKeeper { get; set; }
 
         public V Value { get; set; }
 
@@ -30,7 +38,7 @@ namespace AN_Project
             }
         }
 
-        public RecursiveTree<V> Root => this;
+        public RecursiveTree<V> Root { get; set; }
 
         public int NumberOfNodes => Children.Sum(c => c.NumberOfNodes) + 1;
 
@@ -48,12 +56,14 @@ namespace AN_Project
         {
             Value = n;
             ChildrenList = new List<RecursiveTree<V>>();
+            ScoreKeeper = new ScoreKeeper();
         }
 
         public RecursiveTree(RecursiveTree<V> original)
         {
             Value = original.Value;
             ChildrenList = original.ChildrenList;
+            ScoreKeeper = new ScoreKeeper();
         }
 
         public void RecursivelyUpdateDepth()
@@ -79,10 +89,81 @@ namespace AN_Project
         /// Add multiple children to this tree
         /// </summary>
         /// <param name="children">The list of children to be added</param>
-        public void AddChildren(List<RecursiveTree<V>> children)
+        public void AddChildren(IEnumerable<RecursiveTree<V>> children)
         {
             ChildrenList.AddRange(children);
             RecursivelyUpdateDepth();
+        }
+
+        public void RemoveChild(RecursiveTree<V> child)
+        {
+            try { ChildrenList.Remove(child); }
+            catch { throw new Exception("Child is no child of this node!"); }
+        }
+
+        public void EmptyChildrenList()
+        {
+            ChildrenList = new List<RecursiveTree<V>>();
+        }
+
+        public void MoveNodeUp(State state, RecursiveTree<Node> node)
+        {
+            if (node == null) throw new Exception("Node was null!");
+            if (node == state.RecTree.Root) throw new Exception("Cannot move the root of the tree up!");
+
+            RecursiveTree<Node> parent = node.Parent;
+
+            int newDepth = Program.random.Next(0, node.depth);
+            int moveUpAmount = node.depth - newDepth;
+
+            if (newDepth == 0)
+            {
+                foreach (RecursiveTree<Node> child in node.Children)
+                {
+                    child.Parent = parent;
+                }
+
+                parent.RemoveChild(node);
+                parent.AddChildren(node.Children);
+
+                state.RecTree.Root.Parent = node;
+                node.EmptyChildrenList();
+                node.AddChild(state.RecTree.Root);
+                node.Parent = null;
+                state.RecTree.Root = node;
+            }
+            else
+            {
+                RecursiveTree<Node> newParent = node.Parent;
+                RecursiveTree<Node> newChild = node;
+
+                for (int i = 0; i < moveUpAmount; i++)
+                {
+                    newParent = newParent.Parent;
+                    newChild = newChild.Parent;
+                }
+
+                foreach (RecursiveTree<Node> child in node.Children)
+                {
+                    child.Parent = parent;
+                }
+                parent.RemoveChild(node);
+
+                newChild.RecursivelyUpdateDepth();
+
+                parent.AddChildren(node.Children);
+
+                newChild.Parent = node;
+                node.EmptyChildrenList();
+                node.AddChild(newChild);
+
+                newParent.RemoveChild(newChild);
+                newParent.AddChild(node);
+
+                node.Parent = newParent;
+            }
+
+            node.depth = newDepth;
         }
     }
 }

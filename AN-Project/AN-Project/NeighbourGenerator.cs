@@ -14,7 +14,8 @@ namespace AN_Project
         /// </summary>
         public static List<(NeighbourGenerator, double)> usageChance = new List<(NeighbourGenerator, double)>
         {
-            (new SwapNeighbourGenerator(), 1.0f)
+            (new MoveUpNeighbourGenerator(), 1.0f)
+            //(new SwapNeighbourGenerator(), 1.0f)
         };
 
         /// <summary>
@@ -72,6 +73,28 @@ namespace AN_Project
                 if (n == state.Tree.Root) continue;
 
                 generatedNeighbours.Add(new SwapNeighbour(state, n));
+            }
+
+            return generatedNeighbours;
+        }
+
+        public override Neighbour GenerateRandom(State state)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    class MoveUpNeighbourGenerator : NeighbourGenerator
+    {
+        public override List<Neighbour> GenerateAll(State state)
+        {
+            List<Neighbour> generatedNeighbours = new List<Neighbour>(state.RecTree.NumberOfNodes - 1);
+
+            foreach (Node n in state.allNodes)
+            {
+                if (n == state.RecTree.Value) continue;
+
+                generatedNeighbours.Add(new MoveUpNeighbour(state, n));
             }
 
             return generatedNeighbours;

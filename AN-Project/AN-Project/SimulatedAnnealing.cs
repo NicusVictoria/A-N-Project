@@ -4,10 +4,7 @@ using System.Text;
 
 namespace AN_Project
 {
-    /// <summary>
-    /// Tabu search
-    /// </summary>
-    class TabuSearcher
+    class SimulatedAnnealing
     {
         /// <summary>
         /// Uses Tabu Search to find a solution
@@ -15,20 +12,22 @@ namespace AN_Project
         /// <returns>The state corresponding to the final solution</returns>
         public State Search()
         {
-            State state = BaseSolutionGenerator.EmptyState();
+            RecursiveTree<Node> recTree = BaseSolutionGenerator.EmptyRecursiveTree();
+            State state = new State(Program.allNodes);
+            state.RecTree = recTree;
 
-            double bestTotalScore = state.Tree.Score;
+            double bestTotalScore = state.RecTree.ScoreKeeper.CurrentScore;
             State bestTotalState = state.Clone();
 
             int i = 0;
             while (true)
             {
                 i++;
-                 
+
                 List<Neighbour> neighbours = new List<Neighbour>();
                 foreach ((NeighbourGenerator ng, double chance) in NeighbourGeneratorGenerator.usageChance)
                 {
-                     neighbours.AddRange(ng.GenerateAll(state));
+                    neighbours.AddRange(ng.GenerateAll(state));
                 }
 
                 double bestNewScore = -1;
@@ -37,7 +36,7 @@ namespace AN_Project
                 foreach (Neighbour neighbour in neighbours)
                 {
                     State newState = neighbour.Result();
-                    double newScore = newState.Tree.Score;
+                    double newScore = newState.RecTree.ScoreKeeper.CurrentScore;
 
                     if (newScore > bestNewScore)
                     {
@@ -58,5 +57,6 @@ namespace AN_Project
                 }
             }
         }
+
     }
 }

@@ -10,7 +10,21 @@ namespace AN_Project
     /// </summary>
     public class State
     {
+        public readonly List<Node> allNodes;
+
+        public State()
+        {
+
+        }
+
+        public State(List<Node> allNodes)
+        {
+            this.allNodes = allNodes;
+        }
+
         public Tree Tree { get; set; }
+
+        public RecursiveTree<Node> RecTree { get; set; }    
 
         public State Clone()
         {

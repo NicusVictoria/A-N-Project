@@ -31,15 +31,12 @@ namespace AN_Project
     class SwapNeighbour : Neighbour
     {
         private readonly State state;
-        private readonly State originalState;
         private readonly TreeNode swapNode;
 
         public SwapNeighbour(State state, TreeNode swapNode)
         {
             this.state = state;
             this.swapNode = swapNode;
-
-            originalState = state.Clone();
         }
 
         public override double Delta()
@@ -55,7 +52,57 @@ namespace AN_Project
 
         public override State Revert()
         {
-            return originalState;
+            throw new NotImplementedException();
+        }
+    }
+
+    class MoveUpNeighbour : Neighbour
+    {
+        private readonly State state;
+        private readonly Node moveUpNode;
+
+        public MoveUpNeighbour(State state, Node moveUpNode)
+        {
+            this.state = state;
+            this.moveUpNode = moveUpNode;
+        }
+
+        public override double Delta()
+        {
+            throw new NotImplementedException();
+        }
+
+        public override State Result()
+        {
+            RecursiveTree<Node> moveUpNodeTree = FindNode(state.RecTree, moveUpNode);
+
+            if (moveUpNodeTree == null)
+            {
+
+            }
+
+            state.RecTree.MoveNodeUp(state, moveUpNodeTree);
+            return state;
+        }
+
+        public override State Revert()
+        {
+            throw new NotImplementedException();
+        }
+
+        public RecursiveTree<Node> FindNode(RecursiveTree<Node> tree, Node node)
+        {
+            if (tree.Value.Number == node.Number) return tree;
+
+            foreach (RecursiveTree<Node> child in tree.Children)
+            {
+                RecursiveTree<Node> result = FindNode(child, node);
+                if (result != null)
+                {
+                    return result;
+                }
+            }
+            return null;
         }
     }
 }

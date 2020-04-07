@@ -88,7 +88,7 @@ namespace AN_Project
             // Save the old parent for later use
             TreeNode parent = node.Parent;
 
-            parent.ChildrenList.Remove(node);
+            parent.RemoveChild(node);
 
             // Update the depth for the parent and all children of the parent
             Depth = Math.Max(Depth, parent.RecursivelyAdjustDepthAndScore(state, ScoreKeeper, 1));
@@ -97,7 +97,7 @@ namespace AN_Project
             node.depth -= 1;
 
             // Add all children of "node" to the parent
-            parent.ChildrenList.AddRange(node.Children);
+            parent.AddChildren(node.Children);
 
             foreach (TreeNode n in node.Children)
             {
@@ -106,14 +106,15 @@ namespace AN_Project
 
 
             // The only child of the new upper node is its old parent
-            node.ChildrenList = new List<TreeNode> { parent };
+            node.EmptyChildrenList();
+            node.AddChild(parent);
             node.Parent = parent.Parent;
 
             // The swapped node is no child anymore of its old parent
             if (parent != Root)
             {
-                parent.Parent.ChildrenList.Remove(parent);
-                parent.Parent.ChildrenList.Add(node);
+                parent.Parent.RemoveChild(parent);
+                parent.Parent.AddChild(node);
             }
             parent.Parent = node;
 
@@ -125,6 +126,65 @@ namespace AN_Project
 
             // Update the list of the lowest nodes
             UpdateLowestNodes();
+        }
+
+        public void MoveNodeUp(State state, TreeNode node)
+        {
+            if (node == Root) throw new Exception("Cannot move the root of the tree up!");
+
+            TreeNode parent = node.Parent;
+
+            int newDepth = Program.random.Next(0, node.depth);
+            int moveUpAmount = node.depth - newDepth;
+
+            if (newDepth == 0)
+            {
+                foreach (TreeNode child in node.Children)
+                {
+                    child.Parent = parent;
+                }
+
+                parent.RemoveChild(node);
+                parent.AddChildren(node.Children);
+
+                Root.Parent = node;
+                node.EmptyChildrenList();
+                node.AddChild(Root);
+                node.Parent = null;
+                Root = node;
+            }
+            else
+            {
+                TreeNode newParent = node.Parent;
+                TreeNode newChild = node;
+
+                for (int i = 0; i < moveUpAmount; i++)
+                {
+                    newParent = newParent.Parent;
+                    newChild = newChild.Parent;
+                }
+
+                foreach (TreeNode child in node.Children)
+                {
+                    child.Parent = parent;
+                }
+                parent.RemoveChild(node);
+
+                newChild.RecursivelyAdjustDepthAndScore(state, ScoreKeeper, -1);
+
+                parent.AddChildren(node.Children);
+
+                newChild.Parent = node;
+                node.EmptyChildrenList();
+                node.AddChild(newChild);
+
+                newParent.RemoveChild(newChild);
+                newParent.AddChild(node);
+
+                node.Parent = newParent;
+            }
+
+            node.depth = newDepth;
         }
 
         /// <summary>
