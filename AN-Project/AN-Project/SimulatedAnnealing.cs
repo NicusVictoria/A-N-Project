@@ -4,54 +4,44 @@ using System.Text;
 
 namespace AN_Project
 {
-    class SimulatedAnnealing
+    class SimulatedAnnealing<T, D> where T : State<D>
     {
         /// <summary>
         /// Uses Tabu Search to find a solution
         /// </summary>
         /// <returns>The state corresponding to the final solution</returns>
-        public State Search()
+        public string Search(T initialState)
         {
-            RecursiveTree<Node> recTree = BaseSolutionGenerator.EmptyRecursiveTree();
-            State state = new State(Program.allNodes);
-            state.RecTree = recTree;
+            T state = initialState;
 
-            double bestTotalScore = state.RecTree.ScoreKeeper.CurrentScore;
-            State bestTotalState = state.Clone();
+            double bestTotalScore = initialState.Score;
+            string bestTotalState = initialState.Data.ToString();
 
             int i = 0;
             while (true)
             {
                 i++;
 
-                List<Neighbour> neighbours = new List<Neighbour>();
-                foreach ((NeighbourGenerator ng, double chance) in NeighbourGeneratorGenerator.usageChance)
+                Neighbour<D> neighbour = state.GetRandomNeighbour();
+
+                //double bestNewScore = state.Score;
+                state.ApplyNeighbour(neighbour);
+                double newScore = state.Score;
+
+                //if (newScore > bestNewScore)
+                //{
+                if (newScore <= bestTotalScore)
                 {
-                    neighbours.AddRange(ng.GenerateAll(state));
+                    bestTotalState = state.Data.ToString();
+                    bestTotalScore = newScore;
+                }
+                //}
+                else
+                {
+                    state.RevertNeighbour(neighbour);
                 }
 
-                double bestNewScore = -1;
-
-                // TODO: parallelise this stuff
-                foreach (Neighbour neighbour in neighbours)
-                {
-                    State newState = neighbour.Result();
-                    double newScore = newState.RecTree.ScoreKeeper.CurrentScore;
-
-                    if (newScore > bestNewScore)
-                    {
-                        state = newState;
-                        bestNewScore = newScore;
-
-                        if (newScore > bestTotalScore)
-                        {
-                            bestTotalState = newState;
-                            bestTotalScore = newScore;
-                        }
-                    }
-                }
-
-                if (i == 100)
+                if (i == 100000)
                 {
                     return bestTotalState;
                 }

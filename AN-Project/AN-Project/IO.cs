@@ -213,7 +213,7 @@ namespace AN_Project
             return allNodes;
         }
 
-        public static string WriteOutput(State finalState)
+        public static string WriteOutput(OldState finalState)
         {
             return finalState.Tree.ToString();
         }

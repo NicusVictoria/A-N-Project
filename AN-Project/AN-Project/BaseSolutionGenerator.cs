@@ -13,11 +13,11 @@ namespace AN_Project
         /// Creates a base solution
         /// </summary>
         /// <returns>A base solution for the search algorithms to use</returns>
-        public static State EmptyState()
+        public static OldState EmptyState()
         {
             int numberOfNodes = Program.inputGraph.Nodes.Count;
 
-            State firstState = new State()
+            OldState firstState = new OldState()
             {
                 Tree = new Tree()
             };
@@ -62,30 +62,20 @@ namespace AN_Project
 
         public static RecursiveTree<Node> EmptyRecursiveTree()
         {
+            Program.allRecTreeNodes = new List<RecursiveTree<Node>>();
             int numberOfNodes = Program.allNodes.Count;
-
-            List<Node> nodes = new List<Node>();
-
-            Node root = new Node(0);
-
-            RecursiveTree<Node> recTree = new RecursiveTree<Node>(root);
-
-            nodes.Add(root);
-
-            RecursiveTree<Node> parent = recTree;
+            RecursiveTree<Node> recTree = new RecursiveTree<Node>(Program.allNodes[0]);
+            Program.allRecTreeNodes.Add(recTree);
+            RecursiveTree<Node> child = recTree;
             for (int i = 1; i < numberOfNodes; i++)
             {
-                Node newNode = new Node(i);
-                RecursiveTree<Node> child = new RecursiveTree<Node>(newNode);
+                Node newNode = Program.allNodes[i];
+                RecursiveTree<Node> parent = new RecursiveTree<Node>(newNode);
                 child.Parent = parent;
                 parent.AddChild(child);
-                nodes.Add(newNode);
-
-                parent = child;
+                child = parent;
+                Program.allRecTreeNodes.Add(parent);
             }
-
-            recTree.RecursivelyUpdateDepth();
-
             return recTree;
         }
     }

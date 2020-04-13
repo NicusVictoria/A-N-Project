@@ -13,19 +13,19 @@ namespace AN_Project
         /// Uses Tabu Search to find a solution
         /// </summary>
         /// <returns>The state corresponding to the final solution</returns>
-        public State Search()
+        public OldState Search()
         {
-            State state = BaseSolutionGenerator.EmptyState();
+            OldState state = BaseSolutionGenerator.EmptyState();
 
             double bestTotalScore = state.Tree.Score;
-            State bestTotalState = state.Clone();
+            OldState bestTotalState = state.Clone();
 
             int i = 0;
             while (true)
             {
                 i++;
                  
-                List<Neighbour> neighbours = new List<Neighbour>();
+                List<OldNeighbour> neighbours = new List<OldNeighbour>();
                 foreach ((NeighbourGenerator ng, double chance) in NeighbourGeneratorGenerator.usageChance)
                 {
                      neighbours.AddRange(ng.GenerateAll(state));
@@ -34,9 +34,9 @@ namespace AN_Project
                 double bestNewScore = -1;
 
                 // TODO: parallelise this stuff
-                foreach (Neighbour neighbour in neighbours)
+                foreach (OldNeighbour neighbour in neighbours)
                 {
-                    State newState = neighbour.Result();
+                    OldState newState = neighbour.Result();
                     double newScore = newState.Tree.Score;
 
                     if (newScore > bestNewScore)

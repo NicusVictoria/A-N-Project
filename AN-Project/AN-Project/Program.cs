@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Threading;
 
 namespace AN_Project
 {
@@ -17,6 +18,7 @@ namespace AN_Project
         public static double averageDistanceRatio;
 
         public static List<Node> allNodes;
+        public static List<RecursiveTree<Node>> allRecTreeNodes;
         public static Random random = new Random();
 
         static void Main(string[] args)
@@ -28,10 +30,13 @@ namespace AN_Project
             /*
             RunExactConsole();
             //*/
+            string fileName = "heur_049";
 
+            ParameterizedThreadStart pm = new ParameterizedThreadStart((q) => RunSimAnnealing(fileName));
+            Thread t = new Thread(pm, 1073741824);
+            t.Start();
             
-            string fileName = "heur_001";
-            RunSimAnnealing(fileName);
+            //RunSimAnnealing(fileName);
             //Run(fileName, true);
             //*/
 
@@ -79,17 +84,16 @@ namespace AN_Project
             Node[] inputAsNodes = IO.ReadInputAsNodes($"..\\..\\..\\..\\..\\Testcases\\{fileName}.gr");
             allNodes = inputAsNodes.ToList();
 
-            SimulatedAnnealing sa = new SimulatedAnnealing();
-            State finalState = sa.Search();
-            
-            string output = IO.WriteOutput(finalState);
+            SimulatedAnnealing<State<RecursiveTree<Node>>,RecursiveTree<Node>> sa = new SimulatedAnnealing<State<RecursiveTree<Node>>, RecursiveTree<Node>>();
+            RecursiveTreeState initialState = new RecursiveTreeState(BaseSolutionGenerator.EmptyRecursiveTree());
+            string finalState = sa.Search(initialState);
 
             using (StreamWriter sw = new StreamWriter($"..\\..\\..\\..\\..\\Results\\{fileName}.tree", false))
             {
-                sw.Write(output);
+                sw.Write(finalState);
             }
 
-            Console.WriteLine($"Tree found with depth {finalState.Tree.Depth}.");
+            Console.WriteLine($"Tree found with depth {finalState.Split('\n')[0]}.");
             Console.WriteLine();
         }
 

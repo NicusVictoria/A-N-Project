@@ -42,6 +42,42 @@ namespace AN_Project
         }
     }
 
+
+    interface INeighbourSpace<T>
+    {
+        public Neighbour<T> GetRandomNeighbour(T data);
+
+        public List<Neighbour<T>> GetAllNeighbours(T data);
+    }
+
+    class MoveUpNeighbourSpace : INeighbourSpace<RecursiveTree<Node>>
+    {
+        public List<Neighbour<RecursiveTree<Node>>> GetAllNeighbours(RecursiveTree<Node> data)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Neighbour<RecursiveTree<Node>> GetRandomNeighbour(RecursiveTree<Node> data)
+        {
+            RecursiveTree<Node> root = Program.allRecTreeNodes[0].Root;
+            RecursiveTree<Node> randomTree = null;
+            while (randomTree == root || randomTree == null)
+            {
+                randomTree = Program.allRecTreeNodes[Program.random.Next(Program.allRecTreeNodes.Count)];
+            }
+            List<RecursiveTree<Node>> parents = new List<RecursiveTree<Node>>();
+            RecursiveTree<Node> parent = randomTree.Parent.Parent; // Dit werkt dus niet echt als dit een child van de root is dus tja, vandaar de comment hierboven bij de whileloop
+            while (parent != null)
+            {
+                parents.Add(parent);
+                parent = parent.Parent;
+            }
+            parents.Add(null); // TODO: Fix, this is supposed to be the root
+            RecursiveTree<Node> randomParent = parents[Program.random.Next(parents.Count)];
+            return new MoveUpNeighbour(randomTree, randomParent);
+        }
+    }
+
     /// <summary>
     /// Abstract class of an object that generates neighbours
     /// </summary>
@@ -52,33 +88,33 @@ namespace AN_Project
         /// </summary>
         /// <param name="state">The current state</param>
         /// <returns>A generated neighbour</returns>
-        public abstract Neighbour GenerateRandom(State state);
+        public abstract OldNeighbour GenerateRandom(OldState state);
         
         /// <summary>
         /// Generates all new neighbours
         /// </summary>
         /// <param name="state">The current state</param>
         /// <returns>All generated neighbours</returns>
-        public abstract List<Neighbour> GenerateAll(State state);
+        public abstract List<OldNeighbour> GenerateAll(OldState state);
     }
 
     class SwapNeighbourGenerator : NeighbourGenerator
     {
-        public override List<Neighbour> GenerateAll(State state)
+        public override List<OldNeighbour> GenerateAll(OldState state)
         {
-            List<Neighbour> generatedNeighbours = new List<Neighbour>(state.Tree.Nodes.Count - 1);
+            List<OldNeighbour> generatedNeighbours = new List<OldNeighbour>(state.Tree.Nodes.Count - 1);
 
             foreach (TreeNode n in state.Tree.Nodes)
             {
                 if (n == state.Tree.Root) continue;
 
-                generatedNeighbours.Add(new SwapNeighbour(state, n));
+                generatedNeighbours.Add(new OldSwapNeighbour(state, n));
             }
 
             return generatedNeighbours;
         }
 
-        public override Neighbour GenerateRandom(State state)
+        public override OldNeighbour GenerateRandom(OldState state)
         {
             throw new NotImplementedException();
         }
@@ -86,21 +122,21 @@ namespace AN_Project
 
     class MoveUpNeighbourGenerator : NeighbourGenerator
     {
-        public override List<Neighbour> GenerateAll(State state)
+        public override List<OldNeighbour> GenerateAll(OldState state)
         {
-            List<Neighbour> generatedNeighbours = new List<Neighbour>(state.RecTree.NumberOfNodes - 1);
+            List<OldNeighbour> generatedNeighbours = new List<OldNeighbour>(state.RecTree.NumberOfNodes - 1);
 
             foreach (Node n in state.allNodes)
             {
                 if (n == state.RecTree.Value) continue;
 
-                generatedNeighbours.Add(new MoveUpNeighbour(state, n));
+                generatedNeighbours.Add(new OldMoveUpNeighbour(state, n));
             }
 
             return generatedNeighbours;
         }
 
-        public override Neighbour GenerateRandom(State state)
+        public override OldNeighbour GenerateRandom(OldState state)
         {
             throw new NotImplementedException();
         }

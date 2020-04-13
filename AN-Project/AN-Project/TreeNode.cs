@@ -62,7 +62,7 @@ namespace AN_Project
         /// </summary>
         /// <param name="change">The amount the depth should be changed by</param>
         /// <returns>The new maximum depth encountered in this subtree</returns>
-        public int RecursivelyAdjustDepthAndScore(State state, ScoreKeeper scoreKeeper, int change)
+        public int RecursivelyAdjustDepthAndScore(OldState state, ScoreKeeper scoreKeeper, int change)
         {
             depth += change;
             int maxDepth = depth;

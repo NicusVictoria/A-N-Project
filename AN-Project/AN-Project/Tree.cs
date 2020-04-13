@@ -81,7 +81,7 @@ namespace AN_Project
         /// Swaps a node with its parents and moces all children of these nodes to the new lower node
         /// </summary>
         /// <param name="node">The node to be swapped with its parent</param>
-        public void SwapWithParent(State state, TreeNode node)
+        public void SwapWithParent(OldState state, TreeNode node)
         {
             if (Root == node) throw new Exception("Cannot swap the root of the tree!");
 
@@ -128,7 +128,7 @@ namespace AN_Project
             UpdateLowestNodes();
         }
 
-        public void MoveNodeUp(State state, TreeNode node)
+        public void MoveNodeUp(OldState state, TreeNode node)
         {
             if (node == Root) throw new Exception("Cannot move the root of the tree up!");
 

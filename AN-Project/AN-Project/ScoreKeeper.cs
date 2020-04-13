@@ -17,7 +17,7 @@ namespace AN_Project
 
         }
 
-        public void CalculateTreeScore(State state)
+        public void CalculateTreeScore(OldState state)
         {
             double depthScore = CalculateDepthScore(state);
             //(double degreeScore, double distanceScore) = CalculateDegreeAndDistanceScore(state);
@@ -44,7 +44,7 @@ namespace AN_Project
         }
         //*/
 
-        private double CalculateDepthScore(State state)
+        private double CalculateDepthScore(OldState state)
         {
             return 1 - (state.Tree.Depth - 2) / (double)state.Tree.Nodes.Count;
         }

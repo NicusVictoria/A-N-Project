@@ -38,7 +38,17 @@ namespace AN_Project
             }
         }
 
-        public RecursiveTree<V> Root { get; set; }
+        public RecursiveTree<V> Root 
+        {
+            get
+            {
+                if(Parent == null)
+                {
+                    return this;
+                }
+                return Parent.Root;
+            } 
+        }
 
         public int NumberOfNodes => Children.Sum(c => c.NumberOfNodes) + 1;
 
@@ -68,6 +78,7 @@ namespace AN_Project
 
         public void RecursivelyUpdateDepth()
         {
+            //if (depthCalculated == false) return;
             depthCalculated = false;
             if (Parent != null)
             {
@@ -106,7 +117,8 @@ namespace AN_Project
             ChildrenList = new List<RecursiveTree<V>>();
         }
 
-        public void MoveNodeUp(State state, RecursiveTree<Node> node)
+        /*
+        public void MoveNodeUp(OldState state, RecursiveTree<Node> node)
         {
             if (node == null) throw new Exception("Node was null!");
             if (node == state.RecTree.Root) throw new Exception("Cannot move the root of the tree up!");
@@ -164,6 +176,55 @@ namespace AN_Project
             }
 
             node.depth = newDepth;
+        }
+        */
+    
+        public override string ToString()
+        {
+            if (typeof(V) == typeof(Node))
+            {
+                return Root.PrintTree(Root as RecursiveTree<Node>);
+            }
+            else
+            {
+                return base.ToString();
+            }
+        }
+
+        private string PrintTree(RecursiveTree<Node> tree)
+        {
+            int[] nodeArray = new int[tree.NumberOfNodes];
+
+            nodeArray[tree.Value.Number - 1] = 0;
+
+            foreach (RecursiveTree<Node> subTree in tree.Children)
+            {
+                PrintTree(subTree, nodeArray);
+            }
+
+
+            StringBuilder stringBuilder = new StringBuilder();
+
+            stringBuilder.Append(tree.Depth);
+            stringBuilder.Append("\n");
+
+            for (int i = 0; i < nodeArray.Length; i++)
+            {
+                stringBuilder.Append(nodeArray[i]);
+                stringBuilder.Append("\n");
+            }
+
+            return stringBuilder.ToString();
+        }
+
+        private void PrintTree(RecursiveTree<Node> tree, int[] nodeArray)
+        {
+            nodeArray[tree.Value.Number - 1] = tree.Parent.Value.Number;
+
+            foreach (RecursiveTree<Node> subTree in tree.Children)
+            {
+                PrintTree(subTree, nodeArray);
+            }
         }
     }
 }
