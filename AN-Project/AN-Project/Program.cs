@@ -94,8 +94,9 @@ namespace AN_Project
             RecursiveTree<Node> tree = recursiveSplit.GetFastHeuristicTree();
             allRecTreeNodes = tree.Root.AllRecTreeNodes;
             RecursiveTreeState heurInitState = new RecursiveTreeState(tree);
-            
+
             string finalState = sa.Search(heurInitState);
+            //string finalState = heurInitState.Data.ToString();
 
             using (StreamWriter sw = new StreamWriter($"..\\..\\..\\..\\..\\Results\\{fileName}.tree", false))
             {

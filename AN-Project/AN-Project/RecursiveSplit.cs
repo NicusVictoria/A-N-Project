@@ -22,26 +22,22 @@ namespace AN_Project
 
         public RecursiveTree<Node> GetFastHeuristicTree()
         {
-            return RecGetFastHeuristicTree(allNodes.ToList(), new HashSet<Node>());
+            return RecGetFastHeuristicTree(allNodes, new HashSet<Node>(), 0, allNodes.Length);
         }
 
-        private RecursiveTree<Node> RecGetFastHeuristicTree(List<Node> Nodes, HashSet<Node> ancestors)
+        private RecursiveTree<Node> RecGetFastHeuristicTree(Node[] nodes, HashSet<Node> ancestors, int left, int right) // Left inclusive, right exclusive
         {
-            Node selectedNode = Nodes.Max();
+            Node selectedNode = nodes.Skip(left).Take(right - left).Max();
             RecursiveTree<Node> newTree = new RecursiveTree<Node>(selectedNode);
             ancestors.Add(selectedNode);
             HashSet<Node> beenList = new HashSet<Node>(ancestors);
             List<List<Node>> connectedComponents = new List<List<Node>>();
-            foreach (Node n in Nodes)
+            for (int i = left; i < right; i++)
             {
-                if (beenList.Contains(n)) continue;
-                List<Node> connectedNodes = DFS.All(n, (nn) => { return true; }, beenList);
+                if (beenList.Contains(nodes[i])) continue;
+                List<Node> connectedNodes = DFS.All(nodes[i], (nn) => { return true; }, beenList);
                 connectedComponents.Add(connectedNodes);
             }
-            /*
-            beenList = new HashSet<Node>();
-            Nodes = new List<Node>();
-            */
             /*
             long mem = GC.GetTotalMemory(false);
             if (mem >= 6442450944)
@@ -49,11 +45,24 @@ namespace AN_Project
                 GC.Collect();
             }
             */
+
+            (int left, int right)[] borders = new (int, int)[connectedComponents.Count];
+            int index = left;
             for (int i = 0; i < connectedComponents.Count; i++)
             {
+                borders[i].left = index;
                 List<Node> component = connectedComponents[i];
-                RecursiveTree<Node> ChildTree = RecGetFastHeuristicTree(component, ancestors);
-                component = new List<Node>();
+                for (int j = 0; j < component.Count; j++)
+                {
+                    nodes[index] = component[j];
+                    index++;
+                }
+                borders[i].right = index;
+            }
+
+            for (int i = 0; i < borders.Length; i++)
+            {
+                RecursiveTree<Node> ChildTree = RecGetFastHeuristicTree(nodes, ancestors, borders[i].left, borders[i].right);
                 ChildTree.Parent = newTree;
                 newTree.AddChild(ChildTree);
             }
