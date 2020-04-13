@@ -13,10 +13,54 @@ namespace AN_Project
         private readonly Node[] allNodes;
         int addedToDict = 0;
         int gottenFromDict = 0;
+        
         public RecursiveSplit(Node[] allNodes)
         {
             this.allNodes = allNodes;
         }
+
+
+        public RecursiveTree<Node> GetFastHeuristicTree()
+        {
+            return RecGetFastHeuristicTree(allNodes.ToList(), new HashSet<Node>());
+        }
+
+        private RecursiveTree<Node> RecGetFastHeuristicTree(List<Node> Nodes, HashSet<Node> ancestors)
+        {
+            Node selectedNode = Nodes.Max();
+            RecursiveTree<Node> newTree = new RecursiveTree<Node>(selectedNode);
+            ancestors.Add(selectedNode);
+            HashSet<Node> beenList = new HashSet<Node>(ancestors);
+            List<List<Node>> connectedComponents = new List<List<Node>>();
+            foreach (Node n in Nodes)
+            {
+                if (beenList.Contains(n)) continue;
+                List<Node> connectedNodes = DFS.All(n, (nn) => { return true; }, beenList);
+                connectedComponents.Add(connectedNodes);
+            }
+            /*
+            beenList = new HashSet<Node>();
+            Nodes = new List<Node>();
+            */
+            /*
+            long mem = GC.GetTotalMemory(false);
+            if (mem >= 6442450944)
+            {
+                GC.Collect();
+            }
+            */
+            for (int i = 0; i < connectedComponents.Count; i++)
+            {
+                List<Node> component = connectedComponents[i];
+                RecursiveTree<Node> ChildTree = RecGetFastHeuristicTree(component, ancestors);
+                component = new List<Node>();
+                ChildTree.Parent = newTree;
+                newTree.AddChild(ChildTree);
+            }
+            ancestors.Remove(selectedNode);
+            return newTree;
+        }
+
 
         /// <summary>
         /// Calculates the treedepth using a heuristic

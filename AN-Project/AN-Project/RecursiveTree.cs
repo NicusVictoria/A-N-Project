@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Numerics;
 using System.Collections;
+using System.Diagnostics;
 
 namespace AN_Project
 {
@@ -29,11 +30,11 @@ namespace AN_Project
         {
             get
             {
-                if (!depthCalculated)
-                {
-                    depth = (Children.Max(c => (int?)c.Depth) ?? 0) + 1;
-                    depthCalculated = true;
-                }
+                //if (!depthCalculated)
+                //{
+                depth = (Children.Max(c => (int?)c.Depth) ?? 0) + 1;
+                //depthCalculated = true;
+                //}
                 return depth;
             }
         }
@@ -51,6 +52,19 @@ namespace AN_Project
         }
 
         public int NumberOfNodes => Children.Sum(c => c.NumberOfNodes) + 1;
+
+        public List<RecursiveTree<V>> AllRecTreeNodes
+        {
+            get
+            {
+                List<RecursiveTree<V>> retList = new List<RecursiveTree<V>>() { this };
+                foreach(RecursiveTree<V> child in Children)
+                {
+                    retList.AddRange(child.AllRecTreeNodes);
+                }
+                return retList;
+            }
+        }
 
         public ReadOnlyCollection<RecursiveTree<V>> Children
         {
@@ -93,7 +107,7 @@ namespace AN_Project
         public void AddChild(RecursiveTree<V> child)
         {
             ChildrenList.Add(child);
-            RecursivelyUpdateDepth();
+            //RecursivelyUpdateDepth();
         }
 
         /// <summary>
@@ -102,8 +116,20 @@ namespace AN_Project
         /// <param name="children">The list of children to be added</param>
         public void AddChildren(IEnumerable<RecursiveTree<V>> children)
         {
+            //Debug.Assert(!CheckForParentLoop()); //TODO remove this, very expensive, just for debug purposes.
             ChildrenList.AddRange(children);
-            RecursivelyUpdateDepth();
+            //RecursivelyUpdateDepth();
+        }
+
+        public bool CheckForParentLoop()
+        {
+            RecursiveTree<V> parent = Parent;
+            while(parent != null)
+            {
+                if (parent == this) return true;
+                parent = parent.Parent;
+            }
+            return false;
         }
 
         public void RemoveChild(RecursiveTree<V> child)

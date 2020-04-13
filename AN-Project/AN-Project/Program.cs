@@ -30,11 +30,13 @@ namespace AN_Project
             /*
             RunExactConsole();
             //*/
-            string fileName = "heur_049";
+            string fileName = "heur_163";
 
+            
             ParameterizedThreadStart pm = new ParameterizedThreadStart((q) => RunSimAnnealing(fileName));
             Thread t = new Thread(pm, 1073741824);
             t.Start();
+            //*/
             
             //RunSimAnnealing(fileName);
             //Run(fileName, true);
@@ -85,8 +87,15 @@ namespace AN_Project
             allNodes = inputAsNodes.ToList();
 
             SimulatedAnnealing<State<RecursiveTree<Node>>,RecursiveTree<Node>> sa = new SimulatedAnnealing<State<RecursiveTree<Node>>, RecursiveTree<Node>>();
-            RecursiveTreeState initialState = new RecursiveTreeState(BaseSolutionGenerator.EmptyRecursiveTree());
-            string finalState = sa.Search(initialState);
+            
+            //RecursiveTreeState initialState = new RecursiveTreeState(BaseSolutionGenerator.EmptyRecursiveTree());
+            
+            RecursiveSplit recursiveSplit = new RecursiveSplit(inputAsNodes);
+            RecursiveTree<Node> tree = recursiveSplit.GetFastHeuristicTree();
+            allRecTreeNodes = tree.Root.AllRecTreeNodes;
+            RecursiveTreeState heurInitState = new RecursiveTreeState(tree);
+            
+            string finalState = sa.Search(heurInitState);
 
             using (StreamWriter sw = new StreamWriter($"..\\..\\..\\..\\..\\Results\\{fileName}.tree", false))
             {
