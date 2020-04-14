@@ -1,11 +1,25 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Runtime.Loader;
 
 namespace AN_Project
 {
     class SimulatedAnnealing<T, D> where T : State<D>
     {
+        private bool SigtermReceived { get; set; }
+
+        public SimulatedAnnealing()
+        {
+            SigtermReceived = false;
+            AssemblyLoadContext.Default.Unloading += OnSigTermReceived;
+        }
+
+        private void OnSigTermReceived(AssemblyLoadContext obj)
+        {
+            SigtermReceived = true;
+        }
+
         /// <summary>
         /// Uses Tabu Search to find a solution
         /// </summary>
@@ -18,7 +32,10 @@ namespace AN_Project
             string bestTotalState = initialState.Data.ToString();
 
             int i = 0;
-            while (true)
+
+            return bestTotalState; // TODO: test only
+
+            while (!SigtermReceived)
             {
                 i++;
 
@@ -41,12 +58,12 @@ namespace AN_Project
                     state.RevertNeighbour(neighbour);
                 }
 
-                if (i == 100000)
+                if (i == 100)
                 {
                     return bestTotalState;
                 }
             }
+            return bestTotalState;
         }
-
     }
 }

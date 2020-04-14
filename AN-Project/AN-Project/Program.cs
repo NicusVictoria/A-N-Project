@@ -4,6 +4,9 @@ using System.IO;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading;
+using System.Runtime.Loader;
+using System.Timers;
+using System.Diagnostics;
 
 namespace AN_Project
 {
@@ -21,6 +24,8 @@ namespace AN_Project
         public static List<RecursiveTree<Node>> allRecTreeNodes;
         public static Random random = new Random();
 
+        private static Stopwatch stopwatch = new Stopwatch();
+
         static void Main(string[] args)
         {
             /*
@@ -30,22 +35,27 @@ namespace AN_Project
             /*
             RunExactConsole();
             //*/
-            string fileName = "heur_163";
+            string fileName = "heur_001";
 
-            
+            /*
             ParameterizedThreadStart pm = new ParameterizedThreadStart((q) => RunSimAnnealing(fileName));
             Thread t = new Thread(pm, 1073741824);
             t.Start();
             //*/
-            
+
             //RunSimAnnealing(fileName);
             //Run(fileName, true);
             //*/
 
+            
+            ParameterizedThreadStart pm = new ParameterizedThreadStart((q) => RunAllSimAnnealing());
+            Thread t = new Thread(pm, 1073741824);
+            t.Start();
+            //*/
             /*
             RunAllHeuristic();
             //*/
-            
+
             /*
             RunAllExact();
             //*/
@@ -83,6 +93,8 @@ namespace AN_Project
         {
             Console.WriteLine($"Starting file {fileName}...");
 
+            stopwatch.Start();
+
             Node[] inputAsNodes = IO.ReadInputAsNodes($"..\\..\\..\\..\\..\\Testcases\\{fileName}.gr");
             allNodes = inputAsNodes.ToList();
 
@@ -103,8 +115,25 @@ namespace AN_Project
                 sw.Write(finalState);
             }
 
-            Console.WriteLine($"Tree found with depth {finalState.Split('\n')[0]}.");
+            stopwatch.Stop();
+
+            Console.WriteLine($"Tree found with depth {finalState.Split('\n')[0]} in {stopwatch.Elapsed.ToString()} seconds.");
             Console.WriteLine();
+
+            stopwatch.Reset();
+        }
+
+        private static void RunSimAnnealingConsole()
+        {
+            Node[] inputAsNodes = IO.ReadInputAsNodes();
+            allNodes = inputAsNodes.ToList();
+            SimulatedAnnealing<State<RecursiveTree<Node>>, RecursiveTree<Node>> sa = new SimulatedAnnealing<State<RecursiveTree<Node>>, RecursiveTree<Node>>();
+            RecursiveSplit recursiveSplit = new RecursiveSplit(inputAsNodes);
+            RecursiveTree<Node> tree = recursiveSplit.GetFastHeuristicTree();
+            allRecTreeNodes = tree.Root.AllRecTreeNodes;
+            RecursiveTreeState heurInitState = new RecursiveTreeState(tree);
+            string finalState = sa.Search(heurInitState);
+            Console.Write(finalState);
         }
 
         private static void RunHeuristicConsole()
@@ -123,6 +152,18 @@ namespace AN_Project
             RecursiveTree<Node> recTree = recSplit.GetBestTree();
             string output = IO.PrintTree(recTree);
             Console.Write(output);
+        }
+
+        private static void RunAllSimAnnealing()
+        {
+            for (int i = 1; i < 200; i += 2)
+            {
+                string file = "heur_";
+                if (i < 10) file += $"00{i}";
+                else if (i < 100) file += $"0{i}";
+                else file += i;
+                RunSimAnnealing(file);
+            }
         }
 
         private static void RunAllHeuristic()

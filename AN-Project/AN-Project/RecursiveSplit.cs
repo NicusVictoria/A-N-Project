@@ -26,9 +26,10 @@ namespace AN_Project
         }
 
         private RecursiveTree<Node> RecGetFastHeuristicTree(Node[] nodes, HashSet<Node> ancestors, int left, int right) // Left inclusive, right exclusive
-        {
+        { 
             Node selectedNode = nodes.Skip(left).Take(right - left).Max();
             RecursiveTree<Node> newTree = new RecursiveTree<Node>(selectedNode);
+            if (left - right == 1) return newTree;
             ancestors.Add(selectedNode);
             HashSet<Node> beenList = new HashSet<Node>(ancestors);
             List<List<Node>> connectedComponents = new List<List<Node>>();
