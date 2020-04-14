@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Numerics;
 using System.Collections;
+using System.Diagnostics;
 
 namespace AN_Project
 {
@@ -20,14 +21,35 @@ namespace AN_Project
         }
 
 
-        public RecursiveTree<Node> GetFastHeuristicTree()
+        public RecursiveTree<Node> GetFastHeuristicTree(Stopwatch timer, bool fast = true)
         {
-            return RecGetFastHeuristicTree(allNodes, new HashSet<Node>(), 0, allNodes.Length);
+            return RecGetFastHeuristicTree(allNodes, new HashSet<Node>(), 0, allNodes.Length, timer, fast);
         }
 
-        private RecursiveTree<Node> RecGetFastHeuristicTree(Node[] nodes, HashSet<Node> ancestors, int left, int right) // Left inclusive, right exclusive
-        { 
-            Node selectedNode = nodes.Skip(left).Take(right - left).Max();
+        private RecursiveTree<Node> RecGetFastHeuristicTree(Node[] nodes, HashSet<Node> ancestors, int left, int right, Stopwatch timer, bool fast) // Left inclusive, right exclusive
+        {
+            if (timer.Elapsed.TotalSeconds >= Program.MaxTimeSeconds)
+            {
+                return CreateLine(nodes.Skip(left).Take(right - left).ToList());
+            }
+
+            IEnumerable<Node> subArray = nodes.Skip(left).Take(right - left);
+            Node selectedNode = null;
+            if (fast) selectedNode = subArray.Max();
+            else
+            {
+                int maxDegree = -1;
+                HashSet<Node> nodesAsHash = new HashSet<Node>(subArray);
+                foreach (Node n in subArray) //TODO implement heuristic instead of this (incorporate this in heuristic)
+                {
+                    int nRemainingDegree = n.RemainingDegree(nodesAsHash);
+                    if (nRemainingDegree > maxDegree)
+                    {
+                        maxDegree = nRemainingDegree;
+                        selectedNode = n;
+                    }
+                }
+            }
             RecursiveTree<Node> newTree = new RecursiveTree<Node>(selectedNode);
             if (left - right == 1) return newTree;
             ancestors.Add(selectedNode);
@@ -63,7 +85,7 @@ namespace AN_Project
 
             for (int i = 0; i < borders.Length; i++)
             {
-                RecursiveTree<Node> ChildTree = RecGetFastHeuristicTree(nodes, ancestors, borders[i].left, borders[i].right);
+                RecursiveTree<Node> ChildTree = RecGetFastHeuristicTree(nodes, ancestors, borders[i].left, borders[i].right, timer, fast);
                 ChildTree.Parent = newTree;
                 newTree.AddChild(ChildTree);
             }

@@ -25,6 +25,9 @@ namespace AN_Project
         public static Random random = new Random();
 
         private static Stopwatch stopwatch = new Stopwatch();
+        private static Stopwatch cumulStopwatch = new Stopwatch();
+        private static Stopwatch timer = new Stopwatch();
+        public const int MaxTimeSeconds = 10;
 
         static void Main(string[] args)
         {
@@ -99,18 +102,34 @@ namespace AN_Project
             allNodes = inputAsNodes.ToList();
 
             SimulatedAnnealing<State<RecursiveTree<Node>>,RecursiveTree<Node>> sa = new SimulatedAnnealing<State<RecursiveTree<Node>>, RecursiveTree<Node>>();
-            
-            //RecursiveTreeState heurInitState = new RecursiveTreeState(BaseSolutionGenerator.EmptyRecursiveTree());
-            
-            //RecursiveSplit recursiveSplit = new RecursiveSplit(inputAsNodes);
-            //RecursiveTree<Node> tree = recursiveSplit.GetFastHeuristicTree();
+            RecursiveSplit recursiveSplit = new RecursiveSplit(inputAsNodes);
 
-            RecursiveTree<Node> tree = IndependentSet.TreeFromIndependentSets(allNodes);
+            RecursiveTreeState heurInitStateLine = new RecursiveTreeState(BaseSolutionGenerator.EmptyRecursiveTree());
+            Console.WriteLine($"Line found with depth {heurInitStateLine.Data.Root.Depth}.");
 
-            
-            allRecTreeNodes = tree.Root.AllRecTreeNodes;
-            RecursiveTreeState heurInitState = new RecursiveTreeState(tree);
-            //*/
+            timer.Start();
+            RecursiveTree<Node> bestTree = recursiveSplit.GetFastHeuristicTree(timer, true);
+            Console.WriteLine($"Fastest heuristic tree found with depth {bestTree.Depth}.");
+
+            timer.Restart();
+            RecursiveTree<Node> treeFromFastHeuristic = recursiveSplit.GetFastHeuristicTree(timer, false);
+            Console.WriteLine($"Fast heuristic tree found with depth {treeFromFastHeuristic.Depth}.");
+            if (treeFromFastHeuristic.Depth < bestTree.Depth)
+            {
+                bestTree = treeFromFastHeuristic;
+            }
+
+            timer.Restart();
+            RecursiveTree<Node> treeFromIndependentSet = IndependentSet.TreeFromIndependentSets(allNodes, timer);
+            Console.WriteLine($"Independent set tree found with depth {treeFromIndependentSet.Depth}.");
+            if (treeFromIndependentSet.Depth < bestTree.Depth)
+            {
+                bestTree = treeFromIndependentSet;
+            }
+
+            timer.Reset();
+            allRecTreeNodes = bestTree.Root.AllRecTreeNodes;
+            RecursiveTreeState heurInitState = new RecursiveTreeState(bestTree);
 
             string finalState = sa.Search(heurInitState);
             //string finalState = heurInitState.Data.ToString();
@@ -122,12 +141,13 @@ namespace AN_Project
 
             stopwatch.Stop();
 
-            Console.WriteLine($"Tree found with depth {finalState.Split('\n')[0]} in {stopwatch.Elapsed.ToString()} seconds.");
+            Console.WriteLine($"Tree found with depth {finalState.Split('\n')[0]} in {stopwatch.Elapsed.ToString()} seconds. (Total time: {cumulStopwatch.Elapsed})");
             Console.WriteLine();
 
             stopwatch.Reset();
         }
 
+        /*
         private static void RunSimAnnealingConsole()
         {
             Node[] inputAsNodes = IO.ReadInputAsNodes();
@@ -140,6 +160,7 @@ namespace AN_Project
             string finalState = sa.Search(heurInitState);
             Console.Write(finalState);
         }
+        //*/
 
         private static void RunHeuristicConsole()
         {
@@ -161,6 +182,7 @@ namespace AN_Project
 
         private static void RunAllSimAnnealing()
         {
+            cumulStopwatch.Start();
             for (int i = 1; i < 200; i += 2)
             {
                 string file = "heur_";

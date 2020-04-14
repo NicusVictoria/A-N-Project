@@ -29,7 +29,7 @@ namespace AN_Project
 
         public int Degree { get { return ConnectedNodes.Count; } }
 
-        public int RemainingDegree(HashSet<Node> subGraph) => ConnectedNodes.Select(n => !subGraph.Contains(n)).Count(); // TODO: should this not be select those that are in the subgraph?
+        public int RemainingDegree(HashSet<Node> subGraph) => ConnectedNodes.Count(n => subGraph.Contains(n)); // TODO: should this not be select those that are in the subgraph?
 
         public double Heuristic { get { return Degree; } } //TODO improve this
 

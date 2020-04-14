@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Diagnostics;
 
 namespace AN_Project
 {
@@ -64,7 +65,7 @@ namespace AN_Project
             return valueIfNotUsed;
         }
 
-        public static RecursiveTree<Node> TreeFromIndependentSets(List<Node> graph)
+        public static RecursiveTree<Node> TreeFromIndependentSets(List<Node> graph, Stopwatch timer)
         {
             List<Node> independentSet = CalculateMaximal(graph);
             Node[] oldNode = new Node[graph.Count];
@@ -159,7 +160,7 @@ namespace AN_Project
                     if (!isConnectedToAnIndependentSetNode) throw new Exception("wa");
                 }
 
-                if (newNodes.Count * (newNodes.Count - 1) / 2 == totalEdges)
+                if (newNodes.Count * (newNodes.Count - 1) / 2 == totalEdges || timer.Elapsed.TotalSeconds >= Program.MaxTimeSeconds)
                 {
                     RecursiveTree<Node> cliqueTreeLeaf = CreateLine(newNodes);
                     foreach (RecursiveTree<Node> tree in treesFromNodes)
