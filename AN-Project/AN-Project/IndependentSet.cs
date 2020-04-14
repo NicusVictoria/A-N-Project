@@ -65,8 +65,9 @@ namespace AN_Project
             return valueIfNotUsed;
         }
 
-        public static RecursiveTree<Node> TreeFromIndependentSets(List<Node> graph, Stopwatch timer)
+        public static RecursiveTree<Node> TreeFromIndependentSets(List<Node> inputGraph, Stopwatch timer)
         {
+            List<Node> graph = new List<Node>(inputGraph);
             List<Node> independentSet = CalculateMaximal(graph);
             Node[] oldNode = new Node[graph.Count];
             List<Node>[] neighboursPreviousLevel = new List<Node>[graph.Count];

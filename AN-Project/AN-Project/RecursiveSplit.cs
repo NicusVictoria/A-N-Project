@@ -23,7 +23,8 @@ namespace AN_Project
 
         public RecursiveTree<Node> GetFastHeuristicTree(Stopwatch timer, bool fast = true)
         {
-            return RecGetFastHeuristicTree(allNodes, new HashSet<Node>(), 0, allNodes.Length, timer, fast);
+            Node[] nodes = (Node[])allNodes.Clone();
+            return RecGetFastHeuristicTree(nodes, new HashSet<Node>(), 0, allNodes.Length, timer, fast);
         }
 
         private RecursiveTree<Node> RecGetFastHeuristicTree(Node[] nodes, HashSet<Node> ancestors, int left, int right, Stopwatch timer, bool fast) // Left inclusive, right exclusive

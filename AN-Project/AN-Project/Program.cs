@@ -182,6 +182,7 @@ namespace AN_Project
 
         private static void RunAllSimAnnealing()
         {
+            cumulStopwatch.Reset();
             cumulStopwatch.Start();
             for (int i = 1; i < 200; i += 2)
             {
