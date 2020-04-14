@@ -3,9 +3,6 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
-using System.Numerics;
-using System.Collections;
-using System.Diagnostics;
 
 namespace AN_Project
 {

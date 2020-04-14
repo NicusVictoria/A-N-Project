@@ -1,14 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace AN_Project
 {
     interface INeighbourSpace<T>
     {
-        public Neighbour<T> GetRandomNeighbour(T data);
+        Neighbour<T> GetRandomNeighbour(T data);
 
-        public List<Neighbour<T>> GetAllNeighbours(T data);
+        List<Neighbour<T>> GetAllNeighbours(T data);
     }
 
     class MoveUpNeighbourSpace : INeighbourSpace<RecursiveTree<Node>>

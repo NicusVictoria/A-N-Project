@@ -1,25 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Runtime.Loader;
-
-namespace AN_Project
+﻿namespace AN_Project
 {
     class SimulatedAnnealing<T, D> where T : State<D>
     {
-        private bool SigtermReceived { get; set; }
-
-        public SimulatedAnnealing()
-        {
-            SigtermReceived = false;
-            AssemblyLoadContext.Default.Unloading += OnSigTermReceived;
-        }
-
-        private void OnSigTermReceived(AssemblyLoadContext obj)
-        {
-            SigtermReceived = true;
-        }
-
         /// <summary>
         /// Uses Tabu Search to find a solution
         /// </summary>
@@ -29,13 +11,13 @@ namespace AN_Project
             T state = initialState;
 
             double bestTotalScore = initialState.Score;
-            string bestTotalState = initialState.Data.ToString();
+            Program.bestStateSoFar = initialState.Data.ToString();
 
             int i = 0;
 
-            return bestTotalState; // TODO: test only
+            return Program.bestStateSoFar; // TODO: test only
 
-            while (!SigtermReceived)
+            while (true)
             {
                 i++;
 
@@ -49,7 +31,7 @@ namespace AN_Project
                 //{
                 if (newScore <= bestTotalScore)
                 {
-                    bestTotalState = state.Data.ToString();
+                    Program.bestStateSoFar = state.Data.ToString();
                     bestTotalScore = newScore;
                 }
                 //}
@@ -60,10 +42,10 @@ namespace AN_Project
 
                 if (i == 100)
                 {
-                    return bestTotalState;
+                    return Program.bestStateSoFar;
                 }
             }
-            return bestTotalState;
+            return Program.bestStateSoFar;
         }
     }
 }

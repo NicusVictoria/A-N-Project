@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Diagnostics;
 
 namespace AN_Project
@@ -96,8 +94,10 @@ namespace AN_Project
                     if (!independentSet.Contains(n))
                     {
                         // If the not was not in the independent set in the last layer, it is present in this layer
-                        Node newNode = new Node(n.Number);
-                        newNode.ConnectedNodes = new List<Node>();
+                        Node newNode = new Node(n.Number)
+                        {
+                            ConnectedNodes = new List<Node>()
+                        };
                         newNodes.Add(newNode);
                         fromNumber[n.Number - 1] = newNode;
                     }

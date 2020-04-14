@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace AN_Project
+﻿namespace AN_Project
 {
     public class ScoreKeeper
     {

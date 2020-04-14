@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Text;
 
 namespace AN_Project
 {
@@ -11,7 +9,7 @@ namespace AN_Project
 
         public double Score { get; protected set; }
 
-        protected abstract List<(INeighbourSpace<S> neighbourSpace, double chance)> NeighbourSpaces { get; }
+        protected abstract List<Tuple<INeighbourSpace<S>, double>> NeighbourSpaces { get; }
 
         public State(S Data)
         {
@@ -27,11 +25,11 @@ namespace AN_Project
             int index = 0;
             do
             {
-                accum += NeighbourSpaces[index].chance;
+                accum += NeighbourSpaces[index].Item2;
                 index++;
             } while (accum < random);
 
-            return NeighbourSpaces[index - 1].neighbourSpace;
+            return NeighbourSpaces[index - 1].Item1;
         }
 
         public Neighbour<S> GetRandomNeighbour() 
@@ -43,9 +41,9 @@ namespace AN_Project
         public List<Neighbour<S>> GetAllNeighbours()
         {
             List<Neighbour<S>> allNeighbours = new List<Neighbour<S>>();
-            foreach ((INeighbourSpace<S> neighbourSpace, _) in NeighbourSpaces)
+            foreach (Tuple<INeighbourSpace<S>, double> tuple in NeighbourSpaces)
             {
-                allNeighbours.AddRange(neighbourSpace.GetAllNeighbours(Data));
+                allNeighbours.AddRange(tuple.Item1.GetAllNeighbours(Data));
             }
             return allNeighbours;
         }
@@ -68,7 +66,6 @@ namespace AN_Project
             neighbour.Revert();
             Score -= neighbour.Delta();
         }
-
     }
 
     class RecursiveTreeState : State<RecursiveTree<Node>>
@@ -78,13 +75,13 @@ namespace AN_Project
             Score = Data.Root.Depth;
         }
 
-        protected override List<(INeighbourSpace<RecursiveTree<Node>> neighbourSpace, double chance)> NeighbourSpaces
+        protected override List<Tuple<INeighbourSpace<RecursiveTree<Node>>, double>> NeighbourSpaces
         {
             get
             {
-                return new List<(INeighbourSpace<RecursiveTree<Node>> neighbourSpace, double chance)>()
+                return new List<Tuple<INeighbourSpace<RecursiveTree<Node>>, double>>()
                 {
-                    (new MoveUpNeighbourSpace(), 1.0f)
+                    new Tuple<INeighbourSpace<RecursiveTree<Node>>, double>(new MoveUpNeighbourSpace(), 1.0f)
                 };
             }
         }

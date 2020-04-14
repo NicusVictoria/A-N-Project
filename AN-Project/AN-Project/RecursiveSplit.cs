@@ -1,10 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Linq;
-using System.Text;
-using System.Numerics;
-using System.Collections;
 using System.Diagnostics;
 
 namespace AN_Project
@@ -60,23 +56,23 @@ namespace AN_Project
                 connectedComponents.Add(connectedNodes);
             }
 
-            (int left, int right)[] borders = new (int, int)[connectedComponents.Count];
+            Tuple<int, int>[] borders = new Tuple<int, int>[connectedComponents.Count];
             int index = left;
             for (int i = 0; i < connectedComponents.Count; i++)
             {
-                borders[i].left = index;
+                borders[i] = new Tuple<int, int>(index, 0);
                 List<Node> component = connectedComponents[i];
                 for (int j = 0; j < component.Count; j++)
                 {
                     nodes[index] = component[j];
                     index++;
                 }
-                borders[i].right = index;
+                borders[i] = new Tuple<int, int>(borders[i].Item1, index);
             }
 
             for (int i = 0; i < borders.Length; i++)
             {
-                RecursiveTree<Node> ChildTree = RecGetFastHeuristicTree(nodes, ancestors, borders[i].left, borders[i].right, timer, fast);
+                RecursiveTree<Node> ChildTree = RecGetFastHeuristicTree(nodes, ancestors, borders[i].Item1, borders[i].Item2, timer, fast);
                 ChildTree.Parent = newTree;
                 newTree.AddChild(ChildTree);
             }
