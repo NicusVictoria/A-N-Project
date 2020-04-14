@@ -12,16 +12,17 @@ namespace AN_Project
 {
     class Program
     {
+        public const int MAXTIMESECONDS = 10;
+
         public static List<Node> allNodes;
         public static List<RecursiveTree<Node>> allRecTreeNodes;
         public static Random random = new Random();
 
-        private static Stopwatch stopwatch = new Stopwatch();
-        private static Stopwatch cumulStopwatch = new Stopwatch();
-        private static Stopwatch timer = new Stopwatch();
-        public const int MaxTimeSeconds = 10;
+        private readonly static Stopwatch stopwatch = new Stopwatch();
+        private readonly static Stopwatch cumulStopwatch = new Stopwatch();
+        private readonly static Stopwatch timer = new Stopwatch();
 
-        static void Main(string[] args)
+        static void Main()
         {
             
             RunHeuristicConsole();
@@ -133,7 +134,7 @@ namespace AN_Project
 
             stopwatch.Stop();
 
-            Console.WriteLine($"Tree found with depth {finalState.Split('\n')[0]} in {stopwatch.Elapsed.ToString()} seconds. (Total time: {cumulStopwatch.Elapsed})");
+            Console.WriteLine($"Tree found with depth {finalState.Split('\n')[0]} in {stopwatch.Elapsed} seconds. (Total time: {cumulStopwatch.Elapsed})");
             Console.WriteLine();
 
             stopwatch.Reset();

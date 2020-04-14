@@ -6,9 +6,11 @@ namespace AN_Project
 {
     public class ScoreKeeper
     {
+        /*
         private const double DEPTHWEIGHT = 0.80;
         private const double DEGREEWEIGHT = 0.10;
         private const double DISTANCEWEIGHT = 0.10;
+        //*/
 
         public double CurrentScore { get; private set; }
 

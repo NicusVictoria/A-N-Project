@@ -43,7 +43,7 @@ namespace AN_Project
         public List<Neighbour<S>> GetAllNeighbours()
         {
             List<Neighbour<S>> allNeighbours = new List<Neighbour<S>>();
-            foreach ((INeighbourSpace<S> neighbourSpace, double chance) in NeighbourSpaces)
+            foreach ((INeighbourSpace<S> neighbourSpace, _) in NeighbourSpaces)
             {
                 allNeighbours.AddRange(neighbourSpace.GetAllNeighbours(Data));
             }

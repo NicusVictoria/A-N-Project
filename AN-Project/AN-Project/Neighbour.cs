@@ -42,11 +42,11 @@ namespace AN_Project
 
     class MoveUpNeighbour : Neighbour<RecursiveTree<Node>>
     {
-        RecursiveTree<Node> moveNode;
-        RecursiveTree<Node> newParent;
-        RecursiveTree<Node> oldParent;
-        RecursiveTree<Node> oldRoot;
-        int startDepth;
+        private readonly RecursiveTree<Node> moveNode;
+        private readonly RecursiveTree<Node> newParent;
+        private readonly RecursiveTree<Node> oldParent;
+        private readonly RecursiveTree<Node> oldRoot;
+        private readonly int startDepth;
 
         public MoveUpNeighbour(RecursiveTree<Node> moveNode, RecursiveTree<Node> newParent)
         {
@@ -106,8 +106,8 @@ namespace AN_Project
 
     class ChangeParent : ElementaryOperation<RecursiveTree<Node>>
     {
-        RecursiveTree<Node> node;
-        RecursiveTree<Node> oldParent;
+        private readonly RecursiveTree<Node> node;
+        private readonly RecursiveTree<Node> oldParent;
 
         public ChangeParent(RecursiveTree<Node> node, RecursiveTree<Node> newParent)
         {
@@ -124,8 +124,8 @@ namespace AN_Project
 
     class RemoveChild : ElementaryOperation<RecursiveTree<Node>>
     {
-        RecursiveTree<Node> node;
-        RecursiveTree<Node> child;
+        private readonly RecursiveTree<Node> node;
+        private readonly RecursiveTree<Node> child;
 
         public RemoveChild(RecursiveTree<Node> node, RecursiveTree<Node> child)
         {
@@ -142,8 +142,8 @@ namespace AN_Project
 
     class RemoveAllChildren : ElementaryOperation<RecursiveTree<Node>>
     {
-        RecursiveTree<Node> node;
-        ReadOnlyCollection<RecursiveTree<Node>> children;
+        private readonly RecursiveTree<Node> node;
+        private readonly ReadOnlyCollection<RecursiveTree<Node>> children;
 
         public RemoveAllChildren(RecursiveTree<Node> node)
         {
@@ -160,8 +160,8 @@ namespace AN_Project
 
     class RemoveChildren : ElementaryOperation<RecursiveTree<Node>>
     {
-        RecursiveTree<Node> node;
-        IEnumerable<RecursiveTree<Node>> children;
+        private readonly RecursiveTree<Node> node;
+        private readonly IEnumerable<RecursiveTree<Node>> children;
 
         public RemoveChildren(RecursiveTree<Node> node, IEnumerable<RecursiveTree<Node>> children)
         {
@@ -181,8 +181,8 @@ namespace AN_Project
 
     class AddChild : ElementaryOperation<RecursiveTree<Node>>
     {
-        RecursiveTree<Node> node;
-        RecursiveTree<Node> child;
+        private readonly RecursiveTree<Node> node;
+        private readonly RecursiveTree<Node> child;
 
         public AddChild(RecursiveTree<Node> node, RecursiveTree<Node> child)
         {
@@ -199,8 +199,8 @@ namespace AN_Project
 
     class AddChildren : ElementaryOperation<RecursiveTree<Node>>
     {
-        RecursiveTree<Node> node;
-        IEnumerable<RecursiveTree<Node>> children;
+        private readonly RecursiveTree<Node> node;
+        private readonly IEnumerable<RecursiveTree<Node>> children;
 
         public AddChildren(RecursiveTree<Node> node, IEnumerable<RecursiveTree<Node>> children)
         {

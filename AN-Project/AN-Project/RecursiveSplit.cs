@@ -26,7 +26,7 @@ namespace AN_Project
 
         private RecursiveTree<Node> RecGetFastHeuristicTree(Node[] nodes, HashSet<Node> ancestors, int left, int right, Stopwatch timer, bool fast) // Left inclusive, right exclusive
         {
-            if (timer.Elapsed.TotalSeconds >= Program.MaxTimeSeconds)
+            if (timer.Elapsed.TotalSeconds >= Program.MAXTIMESECONDS)
             {
                 return CreateLine(nodes.Skip(left).Take(right - left).ToList());
             }
