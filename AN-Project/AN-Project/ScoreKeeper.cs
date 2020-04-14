@@ -17,13 +17,15 @@ namespace AN_Project
 
         }
 
+        /*
         public void CalculateTreeScore(OldState state)
         {
             double depthScore = CalculateDepthScore(state);
             //(double degreeScore, double distanceScore) = CalculateDegreeAndDistanceScore(state);
 
-            CurrentScore = depthScore * DEPTHWEIGHT /*+ degreeScore * DEGREEWEIGHT + distanceScore * DISTANCEWEIGHT*/;
+            CurrentScore = depthScore * DEPTHWEIGHT + degreeScore * DEGREEWEIGHT + distanceScore * DISTANCEWEIGHT;
         }
+        //*/
 
         /*
         public void CalculateNodeScore(State state, Node node)
@@ -44,10 +46,12 @@ namespace AN_Project
         }
         //*/
 
+        /*
         private double CalculateDepthScore(OldState state)
         {
             return 1 - (state.Tree.Depth - 2) / (double)state.Tree.Nodes.Count;
         }
+        //*/
 
         /*
         private (double degree, double distance) CalculateDegreeAndDistanceScore(State state)

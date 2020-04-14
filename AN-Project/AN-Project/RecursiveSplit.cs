@@ -12,14 +12,11 @@ namespace AN_Project
     class RecursiveSplit
     {
         private readonly Node[] allNodes;
-        int addedToDict = 0;
-        int gottenFromDict = 0;
         
         public RecursiveSplit(Node[] allNodes)
         {
             this.allNodes = allNodes;
         }
-
 
         public RecursiveTree<Node> GetFastHeuristicTree(Stopwatch timer, bool fast = true)
         {
@@ -62,13 +59,6 @@ namespace AN_Project
                 List<Node> connectedNodes = DFS.All(nodes[i], (nn) => { return true; }, beenList);
                 connectedComponents.Add(connectedNodes);
             }
-            /*
-            long mem = GC.GetTotalMemory(false);
-            if (mem >= 6442450944)
-            {
-                GC.Collect();
-            }
-            */
 
             (int left, int right)[] borders = new (int, int)[connectedComponents.Count];
             int index = left;
@@ -141,8 +131,6 @@ namespace AN_Project
         /// <returns>A BigInteger containing the "value" for this set of nodes</returns>
         private string NodeSubsetRepresentation(List<Node> nodes)
         {
-            // TODO: nodenumber wordt nu niet gebruikt, is dat ook de bedoeling?
-
             byte[] bytes = new byte[(int)Math.Ceiling(allNodes.Length / 8f)];
             for (int i = 0; i < nodes.Count; i++)
             {
@@ -153,30 +141,8 @@ namespace AN_Project
                 bytes[byteIndex] |= (byte)(1 << bitInByteIndex);
             }
 
-            // TODO: fix this. It is very fast (with most encodings), however, the program loses nodes when this is used.
-
-            //string encodedString = Encoding.UTF8.GetString(bytes, 0, bytes.Length);
-            //byte[] check = Encoding.UTF8.GetBytes(encodedString);
-            //return encodedString;
-            //return BitConverter.ToString(bytes);
-            //return bytes.ToString();
-
-
             string encodedString = Convert.ToBase64String(bytes);
-            //byte[] test = Convert.FromBase64String(encodedString);
-            //if (!test.SequenceEqual(bytes))
-            //{
-            //}
             return encodedString;
-
-
-            StringBuilder sb = new StringBuilder();
-            for (int i = 0; i < bytes.Length; i++)
-            {
-                sb.Append(bytes[i]);
-                sb.Append("-");
-            }
-            return sb.ToString();
         }
 
         /// <summary>
@@ -204,7 +170,6 @@ namespace AN_Project
             if (checkedSubsets.ContainsKey(asBits) && checkedSubsets[asBits] != null)
             {
                 RecursiveTree<Node> orphan = new RecursiveTree<Node>(checkedSubsets[asBits]);
-                gottenFromDict++;
                 return orphan;
             }
 
@@ -233,25 +198,14 @@ namespace AN_Project
                         selectedNode
                     };
 
-                    /*
-                    if (newTree.Children.Count > 0 && connectedNodes.Count < newTree.Depth - 1)//TODO: MAY NOT WORK
-                    {
-                        RecursiveTree<Node> ChildTree = CreateLine(connectedNodes);
-                        ChildTree.Parent = newTree;
-                        newTree.AddChild(ChildTree);
-                    }
-                    else
-                    {
-                    */
                     RecursiveTree<Node> ChildTree = RecGetBestTree(bestFoundSolution, connectedNodes, newHash, checkedSubsets);
-                        if (ChildTree == null)
-                        {
-                            broken = true;
-                            break;
-                        }
-                        ChildTree.Parent = newTree;
-                        newTree.AddChild(ChildTree);
-                    //}
+                    if (ChildTree == null)
+                    {
+                        broken = true;
+                        break;
+                    }
+                    ChildTree.Parent = newTree;
+                    newTree.AddChild(ChildTree);
                 }
                 if (!broken)
                 {
@@ -264,7 +218,6 @@ namespace AN_Project
                 }
             }
             checkedSubsets[asBits] = bestTree;
-            addedToDict++;
             return bestTree;
         }
 

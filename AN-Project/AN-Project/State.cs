@@ -89,31 +89,4 @@ namespace AN_Project
             }
         }
     }
-
-    /// <summary>
-    /// Class containing the current state of the program
-    /// </summary>
-    public class OldState
-    {
-        public readonly List<Node> allNodes;
-
-        public OldState()
-        {
-
-        }
-
-        public OldState(List<Node> allNodes)
-        {
-            this.allNodes = allNodes;
-        }
-
-        public Tree Tree { get; set; }
-
-        public RecursiveTree<Node> RecTree { get; set; }    
-
-        public OldState Clone()
-        {
-            return this.Copy();
-        }
-    }
 }

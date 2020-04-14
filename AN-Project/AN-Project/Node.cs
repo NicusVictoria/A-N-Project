@@ -16,6 +16,23 @@ namespace AN_Project
         List<N> ConnectedNodes { get; }
     }
 
+    /// <summary>
+    /// An interface for a basic tree-node. 
+    /// </summary>
+    public interface ITreeNode<T> where T : ITreeNode<T>
+    {
+        /// <summary>
+        /// All nodes that are children of this node in the tree
+        /// </summary>
+        ReadOnlyCollection<T> Children { get; }
+
+        /// <summary>
+        /// The parent of this node in the tree
+        /// </summary>
+        T Parent { get; }
+    }
+
+
     public class Node : INode<Node>, IComparable<Node>
     {
         public Node(int number)
@@ -29,7 +46,7 @@ namespace AN_Project
 
         public int Degree { get { return ConnectedNodes.Count; } }
 
-        public int RemainingDegree(HashSet<Node> subGraph) => ConnectedNodes.Count(n => subGraph.Contains(n)); // TODO: should this not be select those that are in the subgraph?
+        public int RemainingDegree(HashSet<Node> subGraph) => ConnectedNodes.Count(n => subGraph.Contains(n));
 
         public double Heuristic { get { return Degree; } } //TODO improve this
 

@@ -12,14 +12,6 @@ namespace AN_Project
 {
     class Program
     {
-        public static UndirectedGraph inputGraph;
-        public static int maxDegree;
-        public static int[] degreeRatios;
-        public static int maxDistanceCOG;
-        public static int[] distanceRatiosToCOG;
-        public static double averageDegreeRatio;
-        public static double averageDistanceRatio;
-
         public static List<Node> allNodes;
         public static List<RecursiveTree<Node>> allRecTreeNodes;
         public static Random random = new Random();
@@ -31,35 +23,35 @@ namespace AN_Project
 
         static void Main(string[] args)
         {
-            /*
+            
             RunHeuristicConsole();
             //*/
 
-            /*
+            
             RunExactConsole();
             //*/
             string fileName = "heur_001";
 
-            /*
+            
             ParameterizedThreadStart pm = new ParameterizedThreadStart((q) => RunSimAnnealing(fileName));
             Thread t = new Thread(pm, 1073741824);
             t.Start();
             //*/
 
-            //RunSimAnnealing(fileName);
-            //Run(fileName, true);
+            RunSimAnnealing(fileName);
+            Run(fileName, true);
             //*/
 
             
-            ParameterizedThreadStart pm = new ParameterizedThreadStart((q) => RunAllSimAnnealing());
-            Thread t = new Thread(pm, 1073741824);
-            t.Start();
+            ParameterizedThreadStart pm2 = new ParameterizedThreadStart((q) => RunAllSimAnnealing());
+            Thread t2 = new Thread(pm2, 1073741824);
+            t2.Start();
             //*/
-            /*
+            
             RunAllHeuristic();
             //*/
 
-            /*
+            
             RunAllExact();
             //*/
         }
@@ -80,8 +72,8 @@ namespace AN_Project
             {
                 recTree = recSplit.GetBestTree();
             }
-            
-            string output = IO.PrintTree(recTree);
+
+            string output = recTree.ToString();
 
             using (StreamWriter sw = new StreamWriter($"..\\..\\..\\..\\..\\Results\\{fileName}.tree", false))
             {
@@ -167,7 +159,7 @@ namespace AN_Project
             Node[] inputAsNodes = IO.ReadInputAsNodes();
             RecursiveSplit recSplit = new RecursiveSplit(inputAsNodes);
             RecursiveTree<Node> recTree = recSplit.GetHeuristicTree();
-            string output = IO.PrintTree(recTree);
+            string output = recTree.ToString();
             Console.Write(output);
         }
         
@@ -176,7 +168,7 @@ namespace AN_Project
             Node[] inputAsNodes = IO.ReadInputAsNodes();
             RecursiveSplit recSplit = new RecursiveSplit(inputAsNodes);
             RecursiveTree<Node> recTree = recSplit.GetBestTree();
-            string output = IO.PrintTree(recTree);
+            string output = recTree.ToString();
             Console.Write(output);
         }
 

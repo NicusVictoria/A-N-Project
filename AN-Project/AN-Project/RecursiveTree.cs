@@ -9,10 +9,26 @@ using System.Diagnostics;
 
 namespace AN_Project
 {
+    /// <summary>
+    /// Interface for a tree
+    /// </summary>
+    /// <typeparam name="N">The type of nodes in the tree</typeparam>
+    public interface ITree<N> where N : ITreeNode<N>
+    {
+        /// <summary>
+        /// The root of the tree
+        /// </summary>
+        N Root { get; }
+
+        /// <summary>
+        /// The depth of the tree; the maximum depth a node in the tree has
+        /// </summary>
+        int Depth { get; }
+    }
+
     public class RecursiveTree<V> : ITree<RecursiveTree<V>>, ITreeNode<RecursiveTree<V>>
     {
         private int depth;
-        private bool depthCalculated;
 
         public RecursiveTree()
         {
@@ -30,11 +46,7 @@ namespace AN_Project
         {
             get
             {
-                //if (!depthCalculated)
-                //{
                 depth = (Children.Max(c => (int?)c.Depth) ?? 0) + 1;
-                //depthCalculated = true;
-                //}
                 return depth;
             }
         }
@@ -90,16 +102,6 @@ namespace AN_Project
             ScoreKeeper = new ScoreKeeper();
         }
 
-        public void RecursivelyUpdateDepth()
-        {
-            //if (depthCalculated == false) return;
-            depthCalculated = false;
-            if (Parent != null)
-            {
-                Parent.RecursivelyUpdateDepth();
-            }
-        }
-
         /// <summary>
         /// Add a child to the children of this tree
         /// </summary>
@@ -107,7 +109,6 @@ namespace AN_Project
         public void AddChild(RecursiveTree<V> child)
         {
             ChildrenList.Add(child);
-            //RecursivelyUpdateDepth();
         }
 
         /// <summary>
@@ -118,7 +119,6 @@ namespace AN_Project
         {
             //Debug.Assert(!CheckForParentLoop()); //TODO remove this, very expensive, just for debug purposes.
             ChildrenList.AddRange(children);
-            //RecursivelyUpdateDepth();
         }
 
         public bool CheckForParentLoop()
@@ -142,68 +142,6 @@ namespace AN_Project
         {
             ChildrenList = new List<RecursiveTree<V>>();
         }
-
-        /*
-        public void MoveNodeUp(OldState state, RecursiveTree<Node> node)
-        {
-            if (node == null) throw new Exception("Node was null!");
-            if (node == state.RecTree.Root) throw new Exception("Cannot move the root of the tree up!");
-
-            RecursiveTree<Node> parent = node.Parent;
-
-            int newDepth = Program.random.Next(0, node.depth);
-            int moveUpAmount = node.depth - newDepth;
-
-            if (newDepth == 0)
-            {
-                foreach (RecursiveTree<Node> child in node.Children)
-                {
-                    child.Parent = parent;
-                }
-
-                parent.RemoveChild(node);
-                parent.AddChildren(node.Children);
-
-                state.RecTree.Root.Parent = node;
-                node.EmptyChildrenList();
-                node.AddChild(state.RecTree.Root);
-                node.Parent = null;
-                state.RecTree.Root = node;
-            }
-            else
-            {
-                RecursiveTree<Node> newParent = node.Parent;
-                RecursiveTree<Node> newChild = node;
-
-                for (int i = 0; i < moveUpAmount; i++)
-                {
-                    newParent = newParent.Parent;
-                    newChild = newChild.Parent;
-                }
-
-                foreach (RecursiveTree<Node> child in node.Children)
-                {
-                    child.Parent = parent;
-                }
-                parent.RemoveChild(node);
-
-                newChild.RecursivelyUpdateDepth();
-
-                parent.AddChildren(node.Children);
-
-                newChild.Parent = node;
-                node.EmptyChildrenList();
-                node.AddChild(newChild);
-
-                newParent.RemoveChild(newChild);
-                newParent.AddChild(node);
-
-                node.Parent = newParent;
-            }
-
-            node.depth = newDepth;
-        }
-        */
     
         public override string ToString()
         {

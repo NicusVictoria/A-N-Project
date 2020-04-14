@@ -8,7 +8,6 @@ namespace AN_Project
 {
     static class IndependentSet
     {
-
         static List<Node> CalculateMaximal(List<Node> graph)
         {
             graph.Sort();
