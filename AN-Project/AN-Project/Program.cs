@@ -100,12 +100,17 @@ namespace AN_Project
 
             SimulatedAnnealing<State<RecursiveTree<Node>>,RecursiveTree<Node>> sa = new SimulatedAnnealing<State<RecursiveTree<Node>>, RecursiveTree<Node>>();
             
-            //RecursiveTreeState initialState = new RecursiveTreeState(BaseSolutionGenerator.EmptyRecursiveTree());
+            //RecursiveTreeState heurInitState = new RecursiveTreeState(BaseSolutionGenerator.EmptyRecursiveTree());
             
-            RecursiveSplit recursiveSplit = new RecursiveSplit(inputAsNodes);
-            RecursiveTree<Node> tree = recursiveSplit.GetFastHeuristicTree();
+            //RecursiveSplit recursiveSplit = new RecursiveSplit(inputAsNodes);
+            //RecursiveTree<Node> tree = recursiveSplit.GetFastHeuristicTree();
+
+            RecursiveTree<Node> tree = IndependentSet.TreeFromIndependentSets(allNodes);
+
+            
             allRecTreeNodes = tree.Root.AllRecTreeNodes;
             RecursiveTreeState heurInitState = new RecursiveTreeState(tree);
+            //*/
 
             string finalState = sa.Search(heurInitState);
             //string finalState = heurInitState.Data.ToString();
