@@ -28,8 +28,7 @@ namespace AN_Project
         /// </summary>
         T Parent { get; }
     }
-
-
+    
     public class Node : INode<Node>, IComparable<Node>
     {
         public Node(int number)

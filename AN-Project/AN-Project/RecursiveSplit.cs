@@ -8,10 +8,18 @@ namespace AN_Project
     class RecursiveSplit
     {
         private readonly Node[] allNodes;
-        
+
+        private IEnumerable<Node> subArray;
+        private readonly HashSet<Node> beenList;
+        private readonly HashSet<Node> nodesAsHash;
+        private readonly List<List<Node>> connectedComponents;
+
         public RecursiveSplit(Node[] allNodes)
         {
             this.allNodes = allNodes;
+            beenList = new HashSet<Node>();
+            nodesAsHash = new HashSet<Node>();
+            connectedComponents = new List<List<Node>>();
         }
 
         public RecursiveTree<Node> GetFastHeuristicTree(Stopwatch timer, bool fast = true)
@@ -27,13 +35,14 @@ namespace AN_Project
                 return CreateLine(nodes.Skip(left).Take(right - left).ToList());
             }
 
-            IEnumerable<Node> subArray = nodes.Skip(left).Take(right - left);
+            subArray = nodes.Skip(left).Take(right - left);
             Node selectedNode = null;
             if (fast) selectedNode = subArray.Max();
             else
             {
                 int maxDegree = -1;
-                HashSet<Node> nodesAsHash = new HashSet<Node>(subArray);
+                nodesAsHash.Clear();
+                nodesAsHash.UnionWith(subArray);
                 foreach (Node n in subArray) //TODO implement heuristic instead of this (incorporate this in heuristic)
                 {
                     int nRemainingDegree = n.RemainingDegree(nodesAsHash);
@@ -44,17 +53,20 @@ namespace AN_Project
                     }
                 }
             }
+
             RecursiveTree<Node> newTree = new RecursiveTree<Node>(selectedNode);
             if (left - right == 1) return newTree;
             ancestors.Add(selectedNode);
-            HashSet<Node> beenList = new HashSet<Node>(ancestors);
-            List<List<Node>> connectedComponents = new List<List<Node>>();
+            beenList.Clear();
+            beenList.UnionWith(ancestors);
+            connectedComponents.Clear();
             for (int i = left; i < right; i++)
             {
                 if (beenList.Contains(nodes[i])) continue;
                 List<Node> connectedNodes = DFS.All(nodes[i], (nn) => { return true; }, beenList);
                 connectedComponents.Add(connectedNodes);
             }
+
 
             Tuple<int, int>[] borders = new Tuple<int, int>[connectedComponents.Count];
             int index = left;
@@ -67,6 +79,8 @@ namespace AN_Project
                     nodes[index] = component[j];
                     index++;
                 }
+                component.Clear();
+                component.TrimExcess();
                 borders[i] = new Tuple<int, int>(borders[i].Item1, index);
             }
 

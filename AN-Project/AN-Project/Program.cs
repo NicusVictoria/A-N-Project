@@ -25,6 +25,7 @@ namespace AN_Project
         {
             //Console.CancelKeyPress += ConsoleOnCancelKeyPressed;
 
+            
             /*
             ParameterizedThreadStart pm = new ParameterizedThreadStart((q) => RunSimAnnealingConsole());
             Thread t = new Thread(pm, 1073741824);
@@ -39,8 +40,8 @@ namespace AN_Project
             RunExactConsole();
             //*/
 
-            
-            string fileName = "heur_001";
+            /*
+            string fileName = "heur_141";
             ParameterizedThreadStart pm = new ParameterizedThreadStart((q) => RunSimAnnealing(fileName));
             Thread t = new Thread(pm, 1073741824);
             t.Start();
@@ -51,7 +52,7 @@ namespace AN_Project
             Run(fileName, true);
             //*/
 
-            /*
+            
             ParameterizedThreadStart pm2 = new ParameterizedThreadStart((q) => RunAllSimAnnealing());
             Thread t2 = new Thread(pm2, 1073741824);
             t2.Start();
@@ -127,12 +128,15 @@ namespace AN_Project
                 bestTree = treeFromFastHeuristic;
             }
 
-            timer.Restart();
-            RecursiveTree<Node> treeFromIndependentSet = IndependentSet.TreeFromIndependentSets(allNodes, timer);
-            Console.WriteLine($"Independent set tree found with depth {treeFromIndependentSet.Depth}.");
-            if (treeFromIndependentSet.Depth < bestTree.Depth)
+            if (allNodes.Count <= 100000)
             {
-                bestTree = treeFromIndependentSet;
+                timer.Restart();
+                RecursiveTree<Node> treeFromIndependentSet = IndependentSet.TreeFromIndependentSets(allNodes, timer);
+                Console.WriteLine($"Independent set tree found with depth {treeFromIndependentSet.Depth}.");
+                if (treeFromIndependentSet.Depth < bestTree.Depth)
+                {
+                    bestTree = treeFromIndependentSet;
+                }
             }
 
             timer.Reset();
@@ -154,6 +158,7 @@ namespace AN_Project
 
             stopwatch.Reset();
         }
+
         private static void RunSimAnnealingConsole()
         {
             Node[] inputAsNodes = IO.ReadInputAsNodes();
@@ -170,11 +175,14 @@ namespace AN_Project
             {
                 bestTree = treeFromFastHeuristic;
             }
-            timer.Restart();
-            RecursiveTree<Node> treeFromIndependentSet = IndependentSet.TreeFromIndependentSets(allNodes, timer);
-            if (treeFromIndependentSet.Depth < bestTree.Depth)
+            if (allNodes.Count <= 100000)
             {
-                bestTree = treeFromIndependentSet;
+                timer.Restart();
+                RecursiveTree<Node> treeFromIndependentSet = IndependentSet.TreeFromIndependentSets(allNodes, timer);
+                if (treeFromIndependentSet.Depth < bestTree.Depth)
+                {
+                    bestTree = treeFromIndependentSet;
+                }
             }
             timer.Reset();
             allRecTreeNodes = bestTree.Root.AllRecTreeNodes;
