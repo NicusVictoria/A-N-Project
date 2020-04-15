@@ -8,89 +8,126 @@ using System.Diagnostics;
 namespace AN_Project
 {
     class Program
-    {
-        public const int MAX_TIME_INITIAL_SOLUTIONS_SECONDS = 480;  // 480 sec = 8 minutes
-        public const int MAX_TIME_TOTAL_SECONDS = 1680;             // 1680 sec = 28 minutes
-        public const double START_TEMP = .3;
-        public const double TEMP_MULTIPLIER_PER_THOUSAND = 0.995;
+    { 
+        /// <summary>
+        /// The maximum time initial solutions can use
+        /// </summary>
+        public const int MAX_TIME_INITIAL_SOLUTIONS_SECONDS = 480; // 480 sec = 8 minutes
 
+        /// <summary>
+        /// The maximum total the program is allowed to use for a single instance
+        /// </summary>
+        public const int MAX_TIME_TOTAL_SECONDS = 1680; // 1680 sec = 28 minutes
+
+        /// <summary>
+        /// If the number of nodes is bigger than this value, no independent set is used for the inital solutions
+        /// </summary>
+        private const int INDEPENDENT_SET_THRESHOLD = 100000;
+
+        /// <summary>
+        /// Start temperature for Simulated Annealing
+        /// </summary>
+        private const double START_TEMP = .3;
+
+        /// <summary>
+        /// Reset threshold for the temperature in Simulated Annealing
+        /// </summary>
+        private const double RESET_TEMPERATURE_THRESHOLD = 0.05;
+
+        /// <summary>
+        /// Temperature multiplier for Simulated Annealing
+        /// </summary>
+        private const double TEMP_MULTIPLIER = 0.995;
+
+        /// <summary>
+        /// After how many iterations the temperature should be multiplied with its multiplier
+        /// </summary>
+        private const int MULTIPLY_TEMP_PER_ITERATIONS = 1000;
+
+        /// <summary>
+        /// List of all nodes in this instance
+        /// </summary>
         public static List<Node> allNodes;
+
+        /// <summary>
+        /// List of all recursive trees that are used in this instance
+        /// </summary>
         public static List<RecursiveTree<Node>> allRecTreeNodes;
-        public static Random random = new Random();
 
-        private readonly static Stopwatch stopwatch = new Stopwatch();
-        private readonly static Stopwatch cumulStopwatch = new Stopwatch();
-        private readonly static Stopwatch timer = new Stopwatch();
+        /// <summary>
+        /// Single random used throughout the program
+        /// </summary>
+        private static Random random = new Random();
 
-        public static string bestStateSoFar;
+        /// <summary>
+        /// Stopwatch used for a single run of a test
+        /// </summary>
+        private readonly static Stopwatch stopwatchSingleRun = new Stopwatch();
 
-        public static string fileName;
+        /// <summary>
+        /// Stopwatch used for the total of multiple runs
+        /// </summary>
+        private readonly static Stopwatch allRunsTotalStopwatch = new Stopwatch();
 
+        /// <summary>
+        /// Timer used to keep track of the time base solution calculations are taking
+        /// </summary>
+        private readonly static Stopwatch initialSolutionsTimer = new Stopwatch();
+
+        /// <summary>
+        /// The best state found thus far by either the base solutions or simulated annealing
+        /// </summary>
+        private static string bestStateSoFar;
+
+        /// <summary>
+        /// Main method for the program
+        /// </summary>
         static void Main()
         {
-            //Console.CancelKeyPress += ConsoleOnCancelKeyPressed;
+            ParameterizedThreadStart parameterizedThreadStart;
 
+            // Multiple run modes, select one and comment the rest
 
+            parameterizedThreadStart = new ParameterizedThreadStart((q) => RunSimAnnealingConsole());
+            //parameterizedThreadStart = new ParameterizedThreadStart((q) => RunHeuristicConsole());
+            //parameterizedThreadStart = new ParameterizedThreadStart((q) => RunExactConsole());
 
-            ParameterizedThreadStart pm = new ParameterizedThreadStart((q) => RunSimAnnealingConsole());
-            Thread t = new Thread(pm, 1073741824);
-            t.Start();
-            //*/
+            string fileName = "heur_187";
+            //parameterizedThreadStart = new ParameterizedThreadStart((q) => RunSimAnnealing(fileName));
+            //parameterizedThreadStart = new ParameterizedThreadStart((q) => Run(fileName, true));
+            //parameterizedThreadStart = new ParameterizedThreadStart((q) => Run(fileName, false));
 
-            /*
-            RunHeuristicConsole();
-            //*/
+            //parameterizedThreadStart = new ParameterizedThreadStart((q) => RunAllSimAnnealing());
+            //parameterizedThreadStart = new ParameterizedThreadStart((q) => RunAllHeuristic());
+            //parameterizedThreadStart = new ParameterizedThreadStart((q) => RunAllExact());
 
-            /*
-            RunExactConsole();
-            //*/
-
-            /*
-            fileName = "heur_187";
-            
-            
-            ParameterizedThreadStart pm = new ParameterizedThreadStart((q) => RunSimAnnealing(fileName));
-            Thread t = new Thread(pm, 1073741824);
-            t.Start();
-            //*/
-
-
-            //RunSimAnnealing(fileName);
-            //Run(fileName, true);
-            //*/
-
-            /*
-            ParameterizedThreadStart pm2 = new ParameterizedThreadStart((q) => RunAllSimAnnealing());
-            Thread t2 = new Thread(pm2, 1073741824);
-            t2.Start();
-            //*/
-
-            //RunAllSimAnnealing();
-
-            /*
-            RunAllHeuristic();
-            //*/
-
-            /*
-            RunAllExact();
-            //*/
+            // Create a new thread and execute the program, using 1GB of stack size
+            Thread thread = new Thread(parameterizedThreadStart, 1073741824);
+            thread.Start();
         }
 
+        /// <summary>
+        /// Recreates the connections between different RecursiveTrees using a string representation of the tree.
+        /// </summary>
+        /// <param name="treeRepresentation">The string representation of a RecursiveTree</param>
         private static void RecreateTree(string treeRepresentation)
         {
             string[] split = treeRepresentation.Split();
             int numberNodes = split.Length - 2;
 
+            // Delete all the children; they are re-added in the next loop
             for (int i = 0; i < numberNodes; i++)
             {
-                allRecTreeNodes[i].EmptyChildrenList();
+                allRecTreeNodes[i].RemoveAllChildren();
             }
-
+            
+            // Add the children and their parents correctly
             for (int i = 0; i < numberNodes; i++)
             {
                 int parentIndex = int.Parse(split[i + 1]) - 1;
                 if (parentIndex == -1)
                 {
+                    // If this RecursiveTree is the root, its parent is null
                     allRecTreeNodes[i].Parent = null;
                     continue;
                 }
@@ -99,11 +136,11 @@ namespace AN_Project
             }
         }
 
-        private static void ConsoleOnCancelKeyPressed(object sender, ConsoleCancelEventArgs e)
-        {
-            Console.WriteLine(bestStateSoFar);
-        }
-
+        /// <summary>
+        /// Runs either the exact or heuristic version of RecursiveSplit. Does not use any form of local search
+        /// </summary>
+        /// <param name="fileName">The name of the file to be used as input (without extension)</param>
+        /// <param name="heuristic">Whether to use the heuristic tree instead of the exact tree</param>
         private static void Run(string fileName, bool heuristic = true)
         {
             Console.WriteLine($"Starting file {fileName}...");
@@ -132,104 +169,133 @@ namespace AN_Project
             Console.WriteLine();
         }
 
+        /// <summary>
+        /// Create base solutions and use simulated annealing to improve on these solutions
+        /// </summary>
+        /// <param name="fileName">The name of the file to be run</param>
         private static void RunSimAnnealing(string fileName)
         {
-            Console.WriteLine($"Starting file {fileName}...");
-
-            stopwatch.Start();
-
-            Node[] inputAsNodes = IO.ReadInputAsNodes($"..\\..\\..\\..\\..\\Testcases\\{fileName}.gr");
-            allNodes = inputAsNodes.ToList();
-
-            SimulatedAnnealing<State<RecursiveTree<Node>>, RecursiveTree<Node>> sa = new SimulatedAnnealing<State<RecursiveTree<Node>>, RecursiveTree<Node>>();
-            RecursiveSplit recursiveSplit = new RecursiveSplit(inputAsNodes);
-
-            RecursiveTreeState heurInitState = new RecursiveTreeState(BaseSolutionGenerator.EmptyRecursiveTree());
-            Console.WriteLine($"Line found with depth {heurInitState.Data.Root.Depth}.");
-            bestStateSoFar = heurInitState.Data.ToString();
-
-
-            timer.Start();
-            RecursiveTree<Node> bestTree = recursiveSplit.GetFastHeuristicTree(timer, true);
-            Console.WriteLine($"Fastest heuristic tree found with depth {bestTree.Depth}.");
-
-            timer.Restart();
-            RecursiveTree<Node> treeFromFastHeuristic = recursiveSplit.GetFastHeuristicTree(timer, false);
-            Console.WriteLine($"Fast heuristic tree found with depth {treeFromFastHeuristic.Depth}.");
-            if (treeFromFastHeuristic.Depth < bestTree.Depth)
-            {
-                bestTree = treeFromFastHeuristic;
-            }
-
-
-            if (allNodes.Count <= 100000)
-            {
-                timer.Restart();
-                RecursiveTree<Node> treeFromIndependentSet = IndependentSet.TreeFromIndependentSets(allNodes, timer);
-                Console.WriteLine($"Independent set tree found with depth {treeFromIndependentSet.Depth}.");
-                if (treeFromIndependentSet.Depth < bestTree.Depth)
-                {
-                    bestTree = treeFromIndependentSet;
-                }
-            }
-
-            timer.Reset();
-            //allRecTreeNodes = bestTree.Root.AllRecTreeNodes;
-            RecreateTree(bestTree.ToString());
-            heurInitState = new RecursiveTreeState(allRecTreeNodes[0].Root);
-
-
-            bestStateSoFar = sa.Search(heurInitState, stopwatch);
-            //string finalState = heurInitState.Data.ToString();
-
-            using (StreamWriter sw = new StreamWriter($"..\\..\\..\\..\\..\\Results\\{fileName}.tree", false))
-            {
-                sw.Write(bestStateSoFar);
-            }
-
-            stopwatch.Stop();
-
-            Console.WriteLine($"Tree found with depth {bestStateSoFar.Split('\n')[0]} in {stopwatch.Elapsed} seconds. (Total time: {cumulStopwatch.Elapsed})");
-            Console.WriteLine();
-
-            stopwatch.Reset();
+            SimulatedAnnealing(fileName, false);
         }
 
+        /// <summary>
+        /// Create base solutions and use simulated annealing to improve on these solutions using data from the console
+        /// </summary>
         private static void RunSimAnnealingConsole()
         {
-            stopwatch.Start();
-            Node[] inputAsNodes = IO.ReadInputAsNodes();
+            SimulatedAnnealing();
+        }
+
+        /// <summary>
+        /// Execute the program using simulated annealing
+        /// </summary>
+        /// <param name="fileName">The name of the file to be run, or empty if the console is used</param>
+        /// <param name="console">Whether input form the console is used. If so, the program runs in quiet mode</param>
+        private static void SimulatedAnnealing(string fileName = "", bool console = true)
+        {
+            if (!console)
+            {
+                Console.WriteLine($"Starting file {fileName}...");
+            }
+
+            // The stopwatch keeps track of the total running time of the program
+            stopwatchSingleRun.Start();
+
+            // Read the input, depending on whether the console is used a file is being read or console input
+            Node[] inputAsNodes;
+            if (!console)
+            {
+                inputAsNodes = IO.ReadInputAsNodes($"..\\..\\..\\..\\..\\Testcases\\{fileName}.gr");
+            }
+            else
+            {
+                inputAsNodes = IO.ReadInputAsNodes();
+            }
             allNodes = inputAsNodes.ToList();
-            SimulatedAnnealing<State<RecursiveTree<Node>>, RecursiveTree<Node>> sa = new SimulatedAnnealing<State<RecursiveTree<Node>>, RecursiveTree<Node>>();
+
+            // Create instances for the simunlated annealing and recursivesplit classes
+            SimulatedAnnealing<State<RecursiveTree<Node>>, RecursiveTree<Node>> simulatedAnnealing = 
+                new SimulatedAnnealing<State<RecursiveTree<Node>>, RecursiveTree<Node>>(random, START_TEMP, RESET_TEMPERATURE_THRESHOLD, TEMP_MULTIPLIER, MULTIPLY_TEMP_PER_ITERATIONS, stopwatchSingleRun, MAX_TIME_TOTAL_SECONDS);
             RecursiveSplit recursiveSplit = new RecursiveSplit(inputAsNodes);
-            RecursiveTreeState heurInitState = new RecursiveTreeState(BaseSolutionGenerator.EmptyRecursiveTree());
+
+            // Find an initial solution where all nodes are in a single line
+            RecursiveTreeState heurInitState = new RecursiveTreeState(BaseSolutionGenerator.LineRecursiveTree(), random);
             bestStateSoFar = heurInitState.Data.ToString();
-            timer.Start();
-            RecursiveTree<Node> bestTree = recursiveSplit.GetFastHeuristicTree(timer, true);
-            timer.Restart();
-            RecursiveTree<Node> treeFromFastHeuristic = recursiveSplit.GetFastHeuristicTree(timer, false);
+            if (!console)
+            {
+                Console.WriteLine($"Line found with depth {heurInitState.Data.Root.Depth}.");
+            }
+
+            // Find an initial solution using the RecursiveSplit using a fast but bad heuristic
+            initialSolutionsTimer.Start();
+            RecursiveTree<Node> bestTree = recursiveSplit.GetFastHeuristicTree(initialSolutionsTimer, true);
+            if (!console)
+            {
+                Console.WriteLine($"Fastest heuristic tree found with depth {bestTree.Depth}.");
+            }
+
+            // Find an initial solution using the RecursiveSplit using a decent but pretty slow heuristic
+            initialSolutionsTimer.Restart();
+            RecursiveTree<Node> treeFromFastHeuristic = recursiveSplit.GetFastHeuristicTree(initialSolutionsTimer, false);
             if (treeFromFastHeuristic.Depth < bestTree.Depth)
             {
                 bestTree = treeFromFastHeuristic;
             }
-            if (allNodes.Count <= 100000)
+            if (!console)
             {
-                timer.Restart();
-                RecursiveTree<Node> treeFromIndependentSet = IndependentSet.TreeFromIndependentSets(allNodes, timer);
+                Console.WriteLine($"Fast heuristic tree found with depth {treeFromFastHeuristic.Depth}.");
+            }
+
+            // If the problem instance is small enough, we would like to try to find an initial solution using independent sets
+            if (allNodes.Count <= INDEPENDENT_SET_THRESHOLD)
+            {
+                initialSolutionsTimer.Restart();
+                RecursiveTree<Node> treeFromIndependentSet = IndependentSet.TreeFromIndependentSets(allNodes, initialSolutionsTimer);
                 if (treeFromIndependentSet.Depth < bestTree.Depth)
                 {
                     bestTree = treeFromIndependentSet;
                 }
+                if (!console)
+                {
+                    Console.WriteLine($"Independent set tree found with depth {treeFromIndependentSet.Depth}.");
+                }
             }
-            timer.Reset();
-            //allRecTreeNodes = bestTree.Root.AllRecTreeNodes;
+
+            // Recreate the tree and save the best found initial solution as the initial solution for simulated annealing
+            initialSolutionsTimer.Reset();
             RecreateTree(bestTree.ToString());
-            heurInitState = new RecursiveTreeState(allRecTreeNodes[0].Root);
-            bestStateSoFar = sa.Search(heurInitState, stopwatch);
-            Console.Write(bestStateSoFar);
-            stopwatch.Reset();
+            heurInitState = new RecursiveTreeState(allRecTreeNodes[0].Root, random);
+            simulatedAnnealing.Search(heurInitState, ref bestStateSoFar);
+
+            // If the input from the console is not used, write the output to a file, otherwise write it back to the console
+            if (!console)
+            {
+                using (StreamWriter sw = new StreamWriter($"..\\..\\..\\..\\..\\Results\\{fileName}.tree", false))
+                {
+                    sw.Write(bestStateSoFar);
+                }
+            }
+            else
+            {
+                Console.Write(bestStateSoFar);
+            }
+
+            // Print the result and total time thus far
+            if (!console)
+            {
+                // Stop the total of this problem instace
+                stopwatchSingleRun.Stop();
+                Console.WriteLine($"Tree found with depth {bestStateSoFar.Split('\n')[0]} in {stopwatchSingleRun.Elapsed} seconds. (Total time: {allRunsTotalStopwatch.Elapsed})");
+                Console.WriteLine();
+            }
+
+            // Reset the stopwatch for the next time the program is run
+            stopwatchSingleRun.Reset();
         }
 
+        /// <summary>
+        /// Create a heuristic solution using RecursiveSplit and data from the console
+        /// </summary>
         private static void RunHeuristicConsole()
         {
             Node[] inputAsNodes = IO.ReadInputAsNodes();
@@ -239,6 +305,9 @@ namespace AN_Project
             Console.Write(output);
         }
 
+        /// <summary>
+        /// Create an exact solution using input data from the Console
+        /// </summary>
         private static void RunExactConsole()
         {
             Node[] inputAsNodes = IO.ReadInputAsNodes();
@@ -248,10 +317,15 @@ namespace AN_Project
             Console.Write(output);
         }
 
+        /// <summary>
+        /// Runs all heuristic tests using base solutions and simulated annealing
+        /// </summary>
         private static void RunAllSimAnnealing()
         {
-            cumulStopwatch.Reset();
-            cumulStopwatch.Start();
+            // This stopwatch keeps track of the total running time of all tests
+            allRunsTotalStopwatch.Reset();
+            allRunsTotalStopwatch.Start();
+
             for (int i = 1; i < 200; i += 2)
             {
                 string file = "heur_";
@@ -262,6 +336,9 @@ namespace AN_Project
             }
         }
 
+        /// <summary>
+        /// Runs all heuristic tests; uses only RecursiveSplit to generate an answer
+        /// </summary>
         private static void RunAllHeuristic()
         {
             for (int i = 1; i < 200; i += 2)
@@ -274,6 +351,9 @@ namespace AN_Project
             }
         }
 
+        /// <summary>
+        /// Runs all exact tests
+        /// </summary>
         private static void RunAllExact()
         {
             for (int i = 1; i < 200; i += 2)

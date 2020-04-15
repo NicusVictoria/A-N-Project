@@ -3,24 +3,50 @@ using System.Collections.Generic;
 
 namespace AN_Project
 {
+    /// <summary>
+    /// A state with all the information needed to run local search
+    /// </summary>
+    /// <typeparam name="S">The type of data structure used for the data</typeparam>
     abstract class State<S>
     {
+        /// <summary>
+        /// The data itself
+        /// </summary>
         public S Data { get; protected set; }
 
+        /// <summary>
+        /// The score of this state
+        /// </summary>
         public virtual double Score { get; protected set; }
 
+        /// <summary>
+        /// List of the possible neighbourspaces and their chance
+        /// </summary>
         protected abstract List<Tuple<INeighbourSpace<S>, double>> NeighbourSpaces { get; }
 
-        public State(S Data)
+        protected Random Random { get; }
+
+        /// <summary>
+        /// Constructor for a state
+        /// </summary>
+        /// <param name="Data">The initial data to use</param>
+        /// <param name="random">An arbitrary instance of random</param>
+        public State(S Data, Random random)
         {
             this.Data = Data;
+            Random = random;
         }
 
+        /// <summary>
+        /// Takes a random neighbourspace according to their chance to be selected
+        /// </summary>
+        /// <returns>A random neighbourspace</returns>
         protected INeighbourSpace<S> GetRandomNeighbourSpace()
         {
             if (NeighbourSpaces.Count == 0) throw new Exception("No neighbourspaces to choose from");
 
-            double random = Program.random.NextDouble();
+            // Calculate a random value and keep iterating over the possible neighbourspaces until this value is reached
+            double random = Random.NextDouble();
             double accum = 0;
             int index = 0;
             do
@@ -29,15 +55,24 @@ namespace AN_Project
                 index++;
             } while (accum < random);
 
+            // Return the corresponding neighbourspace
             return NeighbourSpaces[index - 1].Item1;
         }
 
+        /// <summary>
+        /// Calculates a random neighbourspace, and from that neighbourspace a random neighbour
+        /// </summary>
+        /// <returns>A random neighbour</returns>
         public Neighbour<S> GetRandomNeighbour()
         {
             INeighbourSpace<S> neighbourSpace = GetRandomNeighbourSpace();
             return neighbourSpace.GetRandomNeighbour(Data);
         }
 
+        /// <summary>
+        /// Returns all neighbours from all neighbourspaces
+        /// </summary>
+        /// <returns>A list with all possible neighbours</returns>
         public List<Neighbour<S>> GetAllNeighbours()
         {
             List<Neighbour<S>> allNeighbours = new List<Neighbour<S>>();
@@ -48,6 +83,10 @@ namespace AN_Project
             return allNeighbours;
         }
 
+        /// <summary>
+        /// Generates a random neighbour and applies it to the current state
+        /// </summary>
+        /// <returns>The neighbour that was applied</returns>
         public Neighbour<S> ApplyRandomNeighbour()
         {
             Neighbour<S> neighbour = GetRandomNeighbour();
@@ -55,24 +94,40 @@ namespace AN_Project
             return neighbour;
         }
 
+        /// <summary>
+        /// Applies a neighbour
+        /// </summary>
+        /// <param name="neighbour">The neigbour to apply</param>
         public virtual void ApplyNeighbour(Neighbour<S> neighbour)
         {
             neighbour.Apply();
-            //Score += neighbour.Delta();
+            //Score += neighbour.Delta(); // TODO: use the delta again
         }
 
+        /// <summary>
+        /// Reverts a neighbour
+        /// </summary>
+        /// <param name="neighbour">The neighbour to revert</param>
         public virtual void RevertNeighbour(Neighbour<S> neighbour)
         {
             neighbour.Revert();
-            //Score -= neighbour.Delta();
+            //Score -= neighbour.Delta(); // TODO: use the delta again
         }
     }
 
+    /// <summary>
+    /// State that uses a recursive tree with nodes as data
+    /// </summary>
     class RecursiveTreeState : State<RecursiveTree<Node>>
     {
         public override double Score { get => Data.Root.Depth; }
 
-        public RecursiveTreeState(RecursiveTree<Node> Data) : base(Data)
+        /// <summary>
+        /// Constructor of the RecursiveTreeState
+        /// </summary>
+        /// <param name="Data">The initial data to use</param>
+        /// <param name="random">The random to be used</param>
+        public RecursiveTreeState(RecursiveTree<Node> Data, Random random) : base(Data, random)
         {
 
         }
@@ -83,10 +138,10 @@ namespace AN_Project
             {
                 return new List<Tuple<INeighbourSpace<RecursiveTree<Node>>, double>>()
                 {
-                    new Tuple<INeighbourSpace<RecursiveTree<Node>>, double>(new SplitNeighbourSpace(), 0.1f),
-                    new Tuple<INeighbourSpace<RecursiveTree<Node>>, double>(new MoveUpNeighbourSpace(), 0.1f),
-                    new Tuple<INeighbourSpace<RecursiveTree<Node>>, double>(new MoveAndSplitNeighbourSpace(), 0.6f),
-                    new Tuple<INeighbourSpace<RecursiveTree<Node>>, double>(new RandomMoveAndSplitNeighbourSpace(3), 0.2f)
+                    new Tuple<INeighbourSpace<RecursiveTree<Node>>, double>(new SplitNeighbourSpace(Random), 0.1f),
+                    new Tuple<INeighbourSpace<RecursiveTree<Node>>, double>(new MoveUpNeighbourSpace(Random), 0.1f),
+                    new Tuple<INeighbourSpace<RecursiveTree<Node>>, double>(new MoveAndSplitNeighbourSpace(Random), 0.6f),
+                    new Tuple<INeighbourSpace<RecursiveTree<Node>>, double>(new RandomMoveAndSplitNeighbourSpace(Random, 3), 0.2f)
                 };
             }
         }
@@ -94,12 +149,16 @@ namespace AN_Project
         public override void ApplyNeighbour(Neighbour<RecursiveTree<Node>> neighbour)
         {
             base.ApplyNeighbour(neighbour);
+            
+            // Set the data to be the root again; needed because of some nodes that were moved
             Data = Data.Root;
         }
 
         public override void RevertNeighbour(Neighbour<RecursiveTree<Node>> neighbour)
         {
             base.RevertNeighbour(neighbour);
+
+            // Set the data to be the root again; needed because of some nodes that were moved
             Data = Data.Root;
         }
     }

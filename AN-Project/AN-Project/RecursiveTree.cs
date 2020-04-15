@@ -23,31 +23,35 @@ namespace AN_Project
         int Depth { get; }
     }
 
+    /// <summary>
+    /// Tree with a node and RecursiveTrees as children
+    /// </summary>
+    /// <typeparam name="V">The type of nodes used in the tree</typeparam>
     public class RecursiveTree<V> : ITree<RecursiveTree<V>>, ITreeNode<RecursiveTree<V>>, INode<RecursiveTree<V>>
     {
-        private int depth;
-
-        public RecursiveTree()
-        {
-            ScoreKeeper = new ScoreKeeper();
-            ChildrenList = new List<RecursiveTree<V>>();
-        }
-
+        /// <summary>
+        /// Internal list with all the children of this tree
+        /// </summary>
         private List<RecursiveTree<V>> ChildrenList { get; set; }
 
+        /// <summary>
+        /// Scorekeeper to keep track of the current score of this tree
+        /// </summary>
         public ScoreKeeper ScoreKeeper { get; set; }
 
+        /// <summary>
+        /// The node in this tree
+        /// </summary>
         public V Value { get; set; }
 
-        public int Depth
-        {
-            get
-            {
-                depth = (Children.Max(c => (int?)c.Depth) ?? 0) + 1;
-                return depth;
-            }
-        }
+        /// <summary>
+        /// The depth of this subtree, gets the maximum depth of its children and adds 1 for itself (recursive)
+        /// </summary>
+        public int Depth => (Children.Max(c => (int?)c.Depth) ?? 0) + 1;
 
+        /// <summary>
+        /// Calcuates the root of the entire tree recursively
+        /// </summary>
         public RecursiveTree<V> Root 
         {
             get
@@ -60,52 +64,61 @@ namespace AN_Project
             } 
         }
 
-        public int NumberOfNodes => Children.Sum(c => c.NumberOfNodes) + 1;
+        /// <summary>
+        /// Calculates the number of nodes in this subtree recursively
+        /// </summary>
+        public int NumberOfNodesInSubtree => Children.Sum(c => c.NumberOfNodesInSubtree) + 1;
 
-        public List<RecursiveTree<V>> AllRecTreeNodes
+        /// <summary>
+        /// Gets all RecursiveTrees in this subtree
+        /// </summary>
+        public List<RecursiveTree<V>> AllRecTreeNodesInSubtree
         {
             get
             {
                 List<RecursiveTree<V>> retList = new List<RecursiveTree<V>>() { this };
                 foreach(RecursiveTree<V> child in Children)
                 {
-                    retList.AddRange(child.AllRecTreeNodes);
+                    retList.AddRange(child.AllRecTreeNodesInSubtree);
                 }
                 return retList;
             }
         }
 
-        public List<V> AllNodes
+        /// <summary>
+        /// Gets all Vs in this subtree
+        /// </summary>
+        public List<V> AllNodesInSubtree
         {
             get
             {
                 List<V> retList = new List<V>() { Value };
                 foreach (RecursiveTree<V> child in Children)
                 {
-                    retList.AddRange(child.AllNodes);
+                    retList.AddRange(child.AllNodesInSubtree);
                 }
                 return retList;
             }
         }
 
-        public ReadOnlyCollection<RecursiveTree<V>> Children
-        {
-            get
-            {
-                return new ReadOnlyCollection<RecursiveTree<V>>(ChildrenList);
-            }
-        }
+        /// <summary>
+        /// The children of this subtree
+        /// </summary>
+        public ReadOnlyCollection<RecursiveTree<V>> Children => new ReadOnlyCollection<RecursiveTree<V>>(ChildrenList);
 
+        /// <summary>
+        /// The parent of this node
+        /// </summary>
         public RecursiveTree<V> Parent { get; set; }
 
+        /// <summary>
+        /// List of all ancestors (in RecursiveTree form) of this subtree, including itself
+        /// </summary>
         public List<RecursiveTree<V>> Ancestors
         {
             get
             {
-                List<RecursiveTree<V>> retList = new List<RecursiveTree<V>>()
-                {
-                    this
-                };
+                List<RecursiveTree<V>> retList = new List<RecursiveTree<V>>() { this };
                 RecursiveTree<V> parent = Parent;
                 while (parent != null)
                 {
@@ -116,14 +129,14 @@ namespace AN_Project
             }
         }
 
+        /// <summary>
+        /// List of all ancestors (in V/node form) of this subtree, including itself
+        /// </summary>
         public List<V> AncestorNodes
         {
             get
             {
-                List<V> retList = new List<V>()
-                {
-                    Value
-                };
+                List<V> retList = new List<V>() { Value };
                 RecursiveTree<V> parent = Parent;
                 while (parent != null)
                 {
@@ -136,6 +149,10 @@ namespace AN_Project
 
         public List<RecursiveTree<V>> ConnectedNodes => ChildrenList;
 
+        /// <summary>
+        /// Constructor for the RecursiveTree
+        /// </summary>
+        /// <param name="n">The node in this tree</param>
         public RecursiveTree(V n)
         {
             Value = n;
@@ -143,6 +160,10 @@ namespace AN_Project
             ScoreKeeper = new ScoreKeeper();
         }
 
+        /// <summary>
+        /// Constructor for the RecursiveTree
+        /// </summary>
+        /// <param name="original">The original RecursiveTree this tree is supposed to be made off</param>
         public RecursiveTree(RecursiveTree<V> original)
         {
             Value = original.Value;
@@ -169,8 +190,13 @@ namespace AN_Project
             ChildrenList.AddRange(children);
         }
 
+        /// <summary>
+        /// Checks the ancestors of this RecursiveTree for a loop
+        /// </summary>
+        /// <returns>Whether a loop in this RecursiveTree's ancestors is found</returns>
         public bool CheckForParentLoop()
         {
+            // TODO: delete this method if not used?
             RecursiveTree<V> parent = Parent;
             while(parent != null)
             {
@@ -180,19 +206,28 @@ namespace AN_Project
             return false;
         }
 
+        /// <summary>
+        /// Remove a child from this RecursiveTree
+        /// </summary>
+        /// <param name="child">The child to be removed</param>
         public void RemoveChild(RecursiveTree<V> child)
         {
             try { ChildrenList.Remove(child); }
             catch { throw new Exception("Child is no child of this node!"); }
         }
 
-        public void EmptyChildrenList()
+        /// <summary>
+        /// Remove all children of this RecursiveTree
+        /// </summary>
+        public void RemoveAllChildren()
         {
+            // TODO: maybe clear instead of new list?
             ChildrenList = new List<RecursiveTree<V>>();
         }
     
         public override string ToString()
         {
+            // If V is of type Node, we can use Node's properties too
             if (typeof(V) == typeof(Node))
             {
                 return Root.PrintTree(Root as RecursiveTree<Node>);
@@ -203,23 +238,29 @@ namespace AN_Project
             }
         }
 
-        private string PrintTree(RecursiveTree<Node> tree)
+        /// <summary>
+        /// Prints a RecursiveTree where V is a Node
+        /// </summary>
+        /// <param name="root">The root of the tree</param>
+        /// <returns>The tree in string representation</returns>
+        private string PrintTree(RecursiveTree<Node> root)
         {
-            int[] nodeArray = new int[tree.NumberOfNodes];
-
-            nodeArray[tree.Value.Number - 1] = 0;
-
-            foreach (RecursiveTree<Node> subTree in tree.Children)
+            // Save the number of the parent of each node in an array
+            int[] nodeArray = new int[root.NumberOfNodesInSubtree];
+            nodeArray[root.Value.Number - 1] = 0;
+            foreach (RecursiveTree<Node> subTree in root.Children)
             {
                 PrintTree(subTree, nodeArray);
             }
 
-
+            // Use a stringbuilder to print the tree
             StringBuilder stringBuilder = new StringBuilder();
-
-            stringBuilder.Append(tree.Depth);
+            
+            // Print the depth of the complete tree
+            stringBuilder.Append(root.Depth);
             stringBuilder.Append("\n");
 
+            // Print each node's parent
             for (int i = 0; i < nodeArray.Length; i++)
             {
                 stringBuilder.Append(nodeArray[i]);
@@ -229,10 +270,14 @@ namespace AN_Project
             return stringBuilder.ToString();
         }
 
+        /// <summary>
+        /// Set the value of the parent of the subtree in the nodearray and recursively calls for all children
+        /// </summary>
+        /// <param name="tree">The subtree to print</param>
+        /// <param name="nodeArray">The array with all parent values</param>
         private void PrintTree(RecursiveTree<Node> tree, int[] nodeArray)
         {
             nodeArray[tree.Value.Number - 1] = tree.Parent.Value.Number;
-
             foreach (RecursiveTree<Node> subTree in tree.Children)
             {
                 PrintTree(subTree, nodeArray);

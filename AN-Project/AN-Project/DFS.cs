@@ -3,6 +3,9 @@ using System.Collections.Generic;
 
 namespace AN_Project
 {
+    /// <summary>
+    /// Implementation of Depth First Search
+    /// </summary>
     public static class DFS
     {
         /// <summary>
@@ -55,7 +58,6 @@ namespace AN_Project
                         stack.Push(n);
                         beenList.Add(n);
                     }
-                    
                 }
             }
             return retList;

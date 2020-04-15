@@ -183,7 +183,7 @@ namespace AN_Project
         private List<List<Node>> FindConnectedComponents()
         {
             List<List<Node>> connectedComponents = new List<List<Node>>();
-            List<Node> subNodes = splitNode.AllNodes;
+            List<Node> subNodes = splitNode.AllNodesInSubtree;
             subNodes.Remove(splitNode.Value);
             HashSet<Node> beenList = new HashSet<Node>(splitNode.AncestorNodes)
             {

@@ -29,22 +29,43 @@ namespace AN_Project
         T Parent { get; }
     }
     
+    /// <summary>
+    /// An implementation of the INode interface
+    /// </summary>
     public class Node : INode<Node>, IComparable<Node>
     {
-        public Node(int number)
-        {
-            this.Number = number;
-        }
-
+        /// <summary>
+        /// The number of this node
+        /// </summary>
         public int Number { get; private set; }
 
         public List<Node> ConnectedNodes { get; set; }
 
+        /// <summary>
+        /// The number of nodes this node is connected to
+        /// </summary>
         public int Degree { get { return ConnectedNodes.Count; } }
 
-        public int RemainingDegree(HashSet<Node> subGraph) => ConnectedNodes.Count(n => subGraph.Contains(n));
-
+        /// <summary>
+        /// A measure for how good it is to choose this node for certain operations
+        /// </summary>
         public double Heuristic { get { return Degree; } } //TODO improve this
+
+        /// <summary>
+        /// Constructor for a node
+        /// </summary>
+        /// <param name="number">The number of this node</param>
+        public Node(int number)
+        {
+            Number = number;
+        }
+
+        /// <summary>
+        /// Calculates the degree o this node while only considering nodes that are in the subgraph. Ignores connections to all other nodes
+        /// </summary>
+        /// <param name="subGraph">The subgraph to calculate the remaining degree in</param>
+        /// <returns></returns>
+        public int RemainingDegree(HashSet<Node> subGraph) => ConnectedNodes.Count(n => subGraph.Contains(n));
 
         int IComparable<Node>.CompareTo(Node other)
         {

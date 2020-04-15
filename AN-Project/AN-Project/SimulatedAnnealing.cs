@@ -1,77 +1,131 @@
-﻿using System.IO;
-using System;
+﻿using System;
 using System.Diagnostics;
 
 namespace AN_Project
 {
-    class SimulatedAnnealing<T, D> where T : State<D>
+    /// <summary>
+    /// Runs simulated annealing on a state
+    /// </summary>
+    /// <typeparam name="S">The type of State being used</typeparam>
+    /// <typeparam name="D">The type of data being used in the state</typeparam>
+    class SimulatedAnnealing<S, D> where S : State<D>
     {
         /// <summary>
-        /// Uses Tabu Search to find a solution
+        /// An arbitrary random used
         /// </summary>
-        /// <returns>The state corresponding to the final solution</returns>
-        public string Search(T initialState, Stopwatch timer)
+        private Random Random { get; }
+
+        /// <summary>
+        /// The start temperature
+        /// </summary>
+        private double StartTemperature { get; }
+
+        /// <summary>
+        /// When the temperature comes below this number, reset it to its start value
+        /// </summary>
+        private double ResetTemperatureThreshold { get; }
+
+        /// <summary>
+        /// When the temperature reaches a certain number of iterations, multiply it by this value
+        /// </summary>
+        private double TemperatureMultiplier { get; }
+
+        /// <summary>
+        /// After this many iterations the temperature gets multiplied by the multiplier
+        /// </summary>
+        private int MultiplyTemperaturePerIterations { get; }
+
+        /// <summary>
+        /// A timer to be used to keep track of the total running time
+        /// </summary>
+        private Stopwatch Timer { get; }
+
+        /// <summary>
+        /// The maximum time the search is allowed to take
+        /// </summary>
+        private int MaxTimeAllowed { get; }
+
+        /// <summary>
+        /// Constructor for Simulated Annealing
+        /// </summary>
+        /// <param name="random">The random to be used</param>
+        /// <param name="startTemperature">The start temperature to be used by the program</param>
+        /// <param name="resetTemperatureThreshold">Reset the temperature when it is smaller than this value</param>
+        /// <param name="temperatureMultiplier">Multiply the temperature by this value every X iterations</param>
+        /// <param name="multiplyTemperaturePerIterations">Per how many iterations the temperature should be multiplied</param>
+        /// <param name="timer">A RUNNING! timer to keep track of how long the simulated annealing is allowed to take</param>
+        /// <param name="maxTimeAllowed">The maximum amount of time the search is allowed to take</param>
+        public SimulatedAnnealing(Random random, double startTemperature, double resetTemperatureThreshold, double temperatureMultiplier, int multiplyTemperaturePerIterations, Stopwatch timer, int maxTimeAllowed)
         {
-            T state = initialState;
+            Random = random;
+            StartTemperature = startTemperature;
+            ResetTemperatureThreshold = resetTemperatureThreshold;
+            TemperatureMultiplier = temperatureMultiplier;
+            MultiplyTemperaturePerIterations = multiplyTemperaturePerIterations;
+            Timer = timer;
+            MaxTimeAllowed = maxTimeAllowed;
+        }
 
+        /// <summary>
+        /// Starts searching for an optimal solution
+        /// </summary>
+        /// <param name="initialState">The start state from where to search</param>
+        /// <param name="bestStateSoFar">Reference where the result (and updates) are supposed to be stored</param>
+        public void Search(S initialState, ref string bestStateSoFar)
+        {
+            S state = initialState;
             double bestTotalScore = initialState.Score;
-            Program.bestStateSoFar = initialState.Data.ToString();
-
-            int i = 0;
-            double prevScore = bestTotalScore;
-
-            double Temp = Program.START_TEMP;
-
-            //return Program.bestStateSoFar; // TODO: test only
-
-            while (Program.MAX_TIME_TOTAL_SECONDS > timer.Elapsed.TotalSeconds)
+            bestStateSoFar = initialState.Data.ToString();
+            double previousScore = bestTotalScore;
+            double temperature = StartTemperature;
+            int iterations = 0;
+            
+            while (MaxTimeAllowed > Timer.Elapsed.TotalSeconds)
             {
-                i++;
+                iterations++;
 
+                // Get a random neighbour and apply it
                 Neighbour<D> neighbour = state.GetRandomNeighbour();
-
-                //double bestNewScore = state.Score;
                 state.ApplyNeighbour(neighbour);
                 double newScore = state.Score;
 
-                //if (newScore > bestNewScore)
-                //{
-                if (newScore <= prevScore)
+                // Update the scores and best solution if necessary
+                if (newScore <= previousScore)
                 {
                     if(newScore <= bestTotalScore)
                     {
-                        Program.bestStateSoFar = state.Data.ToString();
+                        bestStateSoFar = state.Data.ToString();
                         bestTotalScore = newScore;
                     }
-                    prevScore = newScore;
+                    previousScore = newScore;
                 }
-                //}
                 else
                 {
-                    double chance = Math.Exp((prevScore - newScore) / Temp);
-                    double random = Program.random.NextDouble();
+                    // There is a chance the neighbour is reverted
+                    double chance = Math.Exp((previousScore - newScore) / temperature);
+                    double random = Random.NextDouble();
                     if (random > chance)
                     {
                         state.RevertNeighbour(neighbour);
                     }
                     else
                     {
-                        prevScore = newScore;
+                        previousScore = newScore;
                     }
                 }
 
-                if(Temp < 0.05)
+                // Reset the temperature if the threshold has been reached
+                if(temperature < ResetTemperatureThreshold)
                 {
-                    Temp = Program.START_TEMP;
+                    temperature = StartTemperature;
                 }
 
-                if (i % 1000 == 0)
+                // Multiply the temperature if needed
+                if (iterations % MultiplyTemperaturePerIterations == 0)
                 {
-                    Temp *= Program.TEMP_MULTIPLIER_PER_THOUSAND;
+                    temperature *= TemperatureMultiplier;
                 }
-
             }
-            return Program.bestStateSoFar;
         }
     }
 }

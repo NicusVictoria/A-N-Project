@@ -7,12 +7,20 @@ namespace AN_Project
     /// </summary>
     class BaseSolutionGenerator
     {
-        public static RecursiveTree<Node> EmptyRecursiveTree()
+        /// <summary>
+        /// Create a RecursiveTree with all nodes in a single line (each tree has exactly one child, except for the single leaf)
+        /// </summary>
+        /// <returns>A RecursiveTree in a line</returns>
+        public static RecursiveTree<Node> LineRecursiveTree()
         {
             Program.allRecTreeNodes = new List<RecursiveTree<Node>>();
             int numberOfNodes = Program.allNodes.Count;
+            
+            // Create the root of the line
             RecursiveTree<Node> recTree = new RecursiveTree<Node>(Program.allNodes[0]);
             Program.allRecTreeNodes.Add(recTree);
+
+            // Loop through all other nodes and create trees for them with the correct parent and cildren references
             RecursiveTree<Node> child = recTree;
             for (int i = 1; i < numberOfNodes; i++)
             {

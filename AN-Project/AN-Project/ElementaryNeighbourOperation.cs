@@ -55,7 +55,7 @@ namespace AN_Project
         {
             this.node = node;
             children = node.Children;
-            node.EmptyChildrenList();
+            node.RemoveAllChildren();
         }
 
         public override void Revert()
