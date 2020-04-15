@@ -160,7 +160,7 @@ namespace AN_Project
                     if (!isConnectedToAnIndependentSetNode) throw new Exception("wa");
                 }
 
-                if (newNodes.Count * (newNodes.Count - 1) / 2 == totalEdges || timer.Elapsed.TotalSeconds >= Program.MAXTIMESECONDS)
+                if (newNodes.Count * (newNodes.Count - 1) / 2 == totalEdges || timer.Elapsed.TotalSeconds >= Program.MAX_TIME_INITIAL_SOLUTIONS_SECONDS)
                 {
                     RecursiveTree<Node> cliqueTreeLeaf = CreateLine(newNodes);
                     foreach (RecursiveTree<Node> tree in treesFromNodes)

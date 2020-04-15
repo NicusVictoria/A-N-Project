@@ -7,7 +7,7 @@ namespace AN_Project
     {
         public S Data { get; protected set; }
 
-        public double Score { get; protected set; }
+        public virtual double Score { get; protected set; }
 
         protected abstract List<Tuple<INeighbourSpace<S>, double>> NeighbourSpaces { get; }
 
@@ -32,7 +32,7 @@ namespace AN_Project
             return NeighbourSpaces[index - 1].Item1;
         }
 
-        public Neighbour<S> GetRandomNeighbour() 
+        public Neighbour<S> GetRandomNeighbour()
         {
             INeighbourSpace<S> neighbourSpace = GetRandomNeighbourSpace();
             return neighbourSpace.GetRandomNeighbour(Data);
@@ -55,24 +55,26 @@ namespace AN_Project
             return neighbour;
         }
 
-        public void ApplyNeighbour(Neighbour<S> neighbour)
+        public virtual void ApplyNeighbour(Neighbour<S> neighbour)
         {
             neighbour.Apply();
-            Score += neighbour.Delta();
+            //Score += neighbour.Delta();
         }
 
-        public void RevertNeighbour(Neighbour<S> neighbour)
+        public virtual void RevertNeighbour(Neighbour<S> neighbour)
         {
             neighbour.Revert();
-            Score -= neighbour.Delta();
+            //Score -= neighbour.Delta();
         }
     }
 
     class RecursiveTreeState : State<RecursiveTree<Node>>
     {
+        public override double Score { get => Data.Root.Depth; }
+
         public RecursiveTreeState(RecursiveTree<Node> Data) : base(Data)
         {
-            Score = Data.Root.Depth;
+
         }
 
         protected override List<Tuple<INeighbourSpace<RecursiveTree<Node>>, double>> NeighbourSpaces
@@ -81,9 +83,24 @@ namespace AN_Project
             {
                 return new List<Tuple<INeighbourSpace<RecursiveTree<Node>>, double>>()
                 {
-                    new Tuple<INeighbourSpace<RecursiveTree<Node>>, double>(new MoveUpNeighbourSpace(), 1.0f)
+                    new Tuple<INeighbourSpace<RecursiveTree<Node>>, double>(new SplitNeighbourSpace(), 0.1f),
+                    new Tuple<INeighbourSpace<RecursiveTree<Node>>, double>(new MoveUpNeighbourSpace(), 0.1f),
+                    new Tuple<INeighbourSpace<RecursiveTree<Node>>, double>(new MoveAndSplitNeighbourSpace(), 0.6f),
+                    new Tuple<INeighbourSpace<RecursiveTree<Node>>, double>(new RandomMoveAndSplitNeighbourSpace(3), 0.2f)
                 };
             }
+        }
+
+        public override void ApplyNeighbour(Neighbour<RecursiveTree<Node>> neighbour)
+        {
+            base.ApplyNeighbour(neighbour);
+            Data = Data.Root;
+        }
+
+        public override void RevertNeighbour(Neighbour<RecursiveTree<Node>> neighbour)
+        {
+            base.RevertNeighbour(neighbour);
+            Data = Data.Root;
         }
     }
 }

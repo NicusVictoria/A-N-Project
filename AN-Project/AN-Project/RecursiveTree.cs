@@ -23,7 +23,7 @@ namespace AN_Project
         int Depth { get; }
     }
 
-    public class RecursiveTree<V> : ITree<RecursiveTree<V>>, ITreeNode<RecursiveTree<V>>
+    public class RecursiveTree<V> : ITree<RecursiveTree<V>>, ITreeNode<RecursiveTree<V>>, INode<RecursiveTree<V>>
     {
         private int depth;
 
@@ -75,6 +75,19 @@ namespace AN_Project
             }
         }
 
+        public List<V> AllNodes
+        {
+            get
+            {
+                List<V> retList = new List<V>() { Value };
+                foreach (RecursiveTree<V> child in Children)
+                {
+                    retList.AddRange(child.AllNodes);
+                }
+                return retList;
+            }
+        }
+
         public ReadOnlyCollection<RecursiveTree<V>> Children
         {
             get
@@ -84,6 +97,44 @@ namespace AN_Project
         }
 
         public RecursiveTree<V> Parent { get; set; }
+
+        public List<RecursiveTree<V>> Ancestors
+        {
+            get
+            {
+                List<RecursiveTree<V>> retList = new List<RecursiveTree<V>>()
+                {
+                    this
+                };
+                RecursiveTree<V> parent = Parent;
+                while (parent != null)
+                {
+                    retList.Add(parent);
+                    parent = parent.Parent;
+                }
+                return retList;
+            }
+        }
+
+        public List<V> AncestorNodes
+        {
+            get
+            {
+                List<V> retList = new List<V>()
+                {
+                    Value
+                };
+                RecursiveTree<V> parent = Parent;
+                while (parent != null)
+                {
+                    retList.Add(parent.Value);
+                    parent = parent.Parent;
+                }
+                return retList;
+            }
+        }
+
+        public List<RecursiveTree<V>> ConnectedNodes => ChildrenList;
 
         public RecursiveTree(V n)
         {

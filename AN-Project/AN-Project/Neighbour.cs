@@ -1,19 +1,19 @@
 ﻿using System.Collections.Generic;
-using System.Collections.ObjectModel;
+using System;
 
 namespace AN_Project
 {
-    abstract class Neighbour<D>
+    abstract class Neighbour<D> : ElementaryNeighbourOperation<D>
     {
-        protected Stack<ElementaryOperation<D>> operations = new Stack<ElementaryOperation<D>>();
+        protected Stack<ElementaryNeighbourOperation<D>> operations = new Stack<ElementaryNeighbourOperation<D>>();
 
         public abstract void Apply();
 
-        public void Revert()
+        public override void Revert()
         {
             while (operations.Count > 0)
             {
-                ElementaryOperation<D> operation = operations.Pop();
+                ElementaryNeighbourOperation<D> operation = operations.Pop();
                 operation.Revert();
             }
         }
@@ -38,9 +38,38 @@ namespace AN_Project
     }
     */
 
+    class MultipleNeighbourNeighbour<D> : Neighbour<D>
+    {
+        private readonly List<Neighbour<D>> neighbours;
+
+        public MultipleNeighbourNeighbour(List<Neighbour<D>> neighbours)
+        {
+            this.neighbours = neighbours;
+        }
+
+        public override void Apply()
+        {
+            for (int i = 0; i < neighbours.Count; i++)
+            {
+                neighbours[i].Apply();
+                operations.Push(neighbours[i]);
+            }
+        }
+
+        public override double Delta()
+        {
+            double total = 0;
+            for (int i = 0; i < neighbours.Count; i++)
+            {
+                total += neighbours[i].Delta();
+            }
+            return total;
+        }
+    }
+
     class MoveUpNeighbour : Neighbour<RecursiveTree<Node>>
     {
-        private readonly RecursiveTree<Node> moveNode;
+        public readonly RecursiveTree<Node> moveNode;
         private readonly RecursiveTree<Node> newParent;
         private readonly RecursiveTree<Node> oldParent;
         private readonly RecursiveTree<Node> oldRoot;
@@ -57,8 +86,7 @@ namespace AN_Project
 
         public override double Delta()
         {
-            int endDepth = moveNode.Root.Depth;
-            return endDepth - startDepth;
+            throw new NotImplementedException();
         }
 
         public override void Apply()
@@ -95,121 +123,83 @@ namespace AN_Project
         }
     }
 
-    abstract class ElementaryOperation<D>
+    class SplitNeighbour : Neighbour<RecursiveTree<Node>>
     {
-        //public abstract double Delta();
-        
-        public abstract ElementaryOperation<D> Revert();
-    }
+        private readonly RecursiveTree<Node> splitNode;
+        private readonly Dictionary<Node, int> componentIndices; // TODO: maybe more efficient to use node.number instaed of node
 
-    class ChangeParent : ElementaryOperation<RecursiveTree<Node>>
-    {
-        private readonly RecursiveTree<Node> node;
-        private readonly RecursiveTree<Node> oldParent;
-
-        public ChangeParent(RecursiveTree<Node> node, RecursiveTree<Node> newParent)
+        public SplitNeighbour(RecursiveTree<Node> splitNode)
         {
-            this.node = node;
-            oldParent = node.Parent;
-            node.Parent = newParent;
+            this.splitNode = splitNode;
+            componentIndices = new Dictionary<Node, int>();
         }
 
-        public override ElementaryOperation<RecursiveTree<Node>> Revert()
+        public override void Apply()
         {
-            return new ChangeParent(node, oldParent);
-        }
-    }
+            List<List<Node>> connectedComponents = FindConnectedComponents();
+            if (connectedComponents.Count == splitNode.Children.Count) return;
+            bool[] foundComponent = new bool[connectedComponents.Count];
+            List<Tuple<RecursiveTree<Node>, RecursiveTree<Node>>> newParents = new List<Tuple<RecursiveTree<Node>, RecursiveTree<Node>>>();
 
-    class RemoveChild : ElementaryOperation<RecursiveTree<Node>>
-    {
-        private readonly RecursiveTree<Node> node;
-        private readonly RecursiveTree<Node> child;
-
-        public RemoveChild(RecursiveTree<Node> node, RecursiveTree<Node> child)
-        {
-            this.node = node;
-            this.child = child;
-            node.RemoveChild(child);
-        }
-
-        public override ElementaryOperation<RecursiveTree<Node>> Revert()
-        {
-            return new AddChild(node, child);
-        }
-    }
-
-    class RemoveAllChildren : ElementaryOperation<RecursiveTree<Node>>
-    {
-        private readonly RecursiveTree<Node> node;
-        private readonly ReadOnlyCollection<RecursiveTree<Node>> children;
-
-        public RemoveAllChildren(RecursiveTree<Node> node)
-        {
-            this.node = node;
-            children = node.Children;
-            node.EmptyChildrenList();
-        }
-
-        public override ElementaryOperation<RecursiveTree<Node>> Revert()
-        {
-            return new AddChildren(node, children);
-        }
-    }
-
-    class RemoveChildren : ElementaryOperation<RecursiveTree<Node>>
-    {
-        private readonly RecursiveTree<Node> node;
-        private readonly IEnumerable<RecursiveTree<Node>> children;
-
-        public RemoveChildren(RecursiveTree<Node> node, IEnumerable<RecursiveTree<Node>> children)
-        {
-            this.node = node;
-            this.children = node.Children;
-            foreach (RecursiveTree<Node> child in children)
+            List<RecursiveTree<Node>> newChildren = DFS.All(splitNode, (n) => 
             {
-                node.RemoveChild(child);
+                if (n == splitNode) return false;
+                int index = componentIndices[n.Value];
+                if (foundComponent[index])
+                {
+                    RecursiveTree<Node> parent = n.Parent;
+                    while(componentIndices[parent.Value] != index)
+                    {
+                        parent = parent.Parent;
+                    }
+                    newParents.Add(new Tuple<RecursiveTree<Node>, RecursiveTree<Node>>(n, parent));
+                    return false;
+                }
+                foundComponent[index] = true;
+                return true;
+            });
+
+            foreach (Tuple<RecursiveTree<Node>, RecursiveTree<Node>> nodePair in newParents)
+            {
+                operations.Push(new RemoveChild(nodePair.Item1.Parent, nodePair.Item1));
+                operations.Push(new ChangeParent(nodePair.Item1, nodePair.Item2));
+                operations.Push(new AddChild(nodePair.Item2, nodePair.Item1));
+            }
+
+            foreach (RecursiveTree<Node> newChild in newChildren)
+            {
+                if (newChild.Parent == splitNode) continue;
+                operations.Push(new RemoveChild(newChild.Parent, newChild));
+                operations.Push(new ChangeParent(newChild, splitNode));
+                operations.Push(new AddChild(splitNode, newChild));
             }
         }
 
-        public override ElementaryOperation<RecursiveTree<Node>> Revert()
+        public override double Delta()
         {
-            return new AddChildren(node, children);
-        }
-    }
-
-    class AddChild : ElementaryOperation<RecursiveTree<Node>>
-    {
-        private readonly RecursiveTree<Node> node;
-        private readonly RecursiveTree<Node> child;
-
-        public AddChild(RecursiveTree<Node> node, RecursiveTree<Node> child)
-        {
-            this.node = node;
-            this.child = child;
-            node.AddChild(child);
+            throw new NotImplementedException();
         }
 
-        public override ElementaryOperation<RecursiveTree<Node>> Revert()
+        private List<List<Node>> FindConnectedComponents()
         {
-            return new RemoveChild(node, child);
-        }
-    }
-
-    class AddChildren : ElementaryOperation<RecursiveTree<Node>>
-    {
-        private readonly RecursiveTree<Node> node;
-        private readonly IEnumerable<RecursiveTree<Node>> children;
-
-        public AddChildren(RecursiveTree<Node> node, IEnumerable<RecursiveTree<Node>> children)
-        {
-            this.node = node;
-            this.children = children;
-            node.AddChildren(children);
-        }
-
-        public override ElementaryOperation<RecursiveTree<Node>> Revert()
-        {
-            return new RemoveChildren(node, children);
+            List<List<Node>> connectedComponents = new List<List<Node>>();
+            List<Node> subNodes = splitNode.AllNodes;
+            subNodes.Remove(splitNode.Value);
+            HashSet<Node> beenList = new HashSet<Node>(splitNode.AncestorNodes)
+            {
+                splitNode.Value
+            };
+            for (int i = 0; i < subNodes.Count; i++)
+            {
+                if (beenList.Contains(subNodes[i])) continue;
+                List<Node> connectedNodes = DFS.All(subNodes[i], (n) => 
+                { 
+                    componentIndices[n] = connectedComponents.Count;
+                    return true;
+                }, beenList);
+                connectedComponents.Add(connectedNodes);
+            }
+            return connectedComponents;
         }
     }
 }

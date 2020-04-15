@@ -9,7 +9,10 @@ namespace AN_Project
 {
     class Program
     {
-        public const int MAXTIMESECONDS = 480;
+        public const int MAX_TIME_INITIAL_SOLUTIONS_SECONDS = 480;  // 480 sec = 8 minutes
+        public const int MAX_TIME_TOTAL_SECONDS = 1680;             // 1680 sec = 28 minutes
+        public const double START_TEMP = .3;
+        public const double TEMP_MULTIPLIER_PER_THOUSAND = 0.995;
 
         public static List<Node> allNodes;
         public static List<RecursiveTree<Node>> allRecTreeNodes;
@@ -21,12 +24,14 @@ namespace AN_Project
 
         public static string bestStateSoFar;
 
+        public static string fileName;
+
         static void Main()
         {
             //Console.CancelKeyPress += ConsoleOnCancelKeyPressed;
 
-            
-            /*
+
+
             ParameterizedThreadStart pm = new ParameterizedThreadStart((q) => RunSimAnnealingConsole());
             Thread t = new Thread(pm, 1073741824);
             t.Start();
@@ -41,23 +46,27 @@ namespace AN_Project
             //*/
 
             /*
-            string fileName = "heur_141";
+            fileName = "heur_187";
+            
+            
             ParameterizedThreadStart pm = new ParameterizedThreadStart((q) => RunSimAnnealing(fileName));
             Thread t = new Thread(pm, 1073741824);
             t.Start();
             //*/
 
-            /*
-            RunSimAnnealing(fileName);
-            Run(fileName, true);
+
+            //RunSimAnnealing(fileName);
+            //Run(fileName, true);
             //*/
 
-            
+            /*
             ParameterizedThreadStart pm2 = new ParameterizedThreadStart((q) => RunAllSimAnnealing());
             Thread t2 = new Thread(pm2, 1073741824);
             t2.Start();
             //*/
-            
+
+            //RunAllSimAnnealing();
+
             /*
             RunAllHeuristic();
             //*/
@@ -65,6 +74,29 @@ namespace AN_Project
             /*
             RunAllExact();
             //*/
+        }
+
+        private static void RecreateTree(string treeRepresentation)
+        {
+            string[] split = treeRepresentation.Split();
+            int numberNodes = split.Length - 2;
+
+            for (int i = 0; i < numberNodes; i++)
+            {
+                allRecTreeNodes[i].EmptyChildrenList();
+            }
+
+            for (int i = 0; i < numberNodes; i++)
+            {
+                int parentIndex = int.Parse(split[i + 1]) - 1;
+                if (parentIndex == -1)
+                {
+                    allRecTreeNodes[i].Parent = null;
+                    continue;
+                }
+                allRecTreeNodes[i].Parent = allRecTreeNodes[parentIndex];
+                allRecTreeNodes[parentIndex].AddChild(allRecTreeNodes[i]);
+            }
         }
 
         private static void ConsoleOnCancelKeyPressed(object sender, ConsoleCancelEventArgs e)
@@ -109,12 +141,13 @@ namespace AN_Project
             Node[] inputAsNodes = IO.ReadInputAsNodes($"..\\..\\..\\..\\..\\Testcases\\{fileName}.gr");
             allNodes = inputAsNodes.ToList();
 
-            SimulatedAnnealing<State<RecursiveTree<Node>>,RecursiveTree<Node>> sa = new SimulatedAnnealing<State<RecursiveTree<Node>>, RecursiveTree<Node>>();
+            SimulatedAnnealing<State<RecursiveTree<Node>>, RecursiveTree<Node>> sa = new SimulatedAnnealing<State<RecursiveTree<Node>>, RecursiveTree<Node>>();
             RecursiveSplit recursiveSplit = new RecursiveSplit(inputAsNodes);
 
-            RecursiveTreeState heurInitStateLine = new RecursiveTreeState(BaseSolutionGenerator.EmptyRecursiveTree());
-            Console.WriteLine($"Line found with depth {heurInitStateLine.Data.Root.Depth}.");
-            bestStateSoFar = heurInitStateLine.Data.ToString();
+            RecursiveTreeState heurInitState = new RecursiveTreeState(BaseSolutionGenerator.EmptyRecursiveTree());
+            Console.WriteLine($"Line found with depth {heurInitState.Data.Root.Depth}.");
+            bestStateSoFar = heurInitState.Data.ToString();
+
 
             timer.Start();
             RecursiveTree<Node> bestTree = recursiveSplit.GetFastHeuristicTree(timer, true);
@@ -128,6 +161,7 @@ namespace AN_Project
                 bestTree = treeFromFastHeuristic;
             }
 
+
             if (allNodes.Count <= 100000)
             {
                 timer.Restart();
@@ -140,10 +174,12 @@ namespace AN_Project
             }
 
             timer.Reset();
-            allRecTreeNodes = bestTree.Root.AllRecTreeNodes;
-            RecursiveTreeState heurInitState = new RecursiveTreeState(bestTree);
+            //allRecTreeNodes = bestTree.Root.AllRecTreeNodes;
+            RecreateTree(bestTree.ToString());
+            heurInitState = new RecursiveTreeState(allRecTreeNodes[0].Root);
 
-            bestStateSoFar = sa.Search(heurInitState);
+
+            bestStateSoFar = sa.Search(heurInitState, stopwatch);
             //string finalState = heurInitState.Data.ToString();
 
             using (StreamWriter sw = new StreamWriter($"..\\..\\..\\..\\..\\Results\\{fileName}.tree", false))
@@ -161,12 +197,13 @@ namespace AN_Project
 
         private static void RunSimAnnealingConsole()
         {
+            stopwatch.Start();
             Node[] inputAsNodes = IO.ReadInputAsNodes();
             allNodes = inputAsNodes.ToList();
             SimulatedAnnealing<State<RecursiveTree<Node>>, RecursiveTree<Node>> sa = new SimulatedAnnealing<State<RecursiveTree<Node>>, RecursiveTree<Node>>();
             RecursiveSplit recursiveSplit = new RecursiveSplit(inputAsNodes);
-            RecursiveTreeState heurInitStateLine = new RecursiveTreeState(BaseSolutionGenerator.EmptyRecursiveTree());
-            bestStateSoFar = heurInitStateLine.Data.ToString();
+            RecursiveTreeState heurInitState = new RecursiveTreeState(BaseSolutionGenerator.EmptyRecursiveTree());
+            bestStateSoFar = heurInitState.Data.ToString();
             timer.Start();
             RecursiveTree<Node> bestTree = recursiveSplit.GetFastHeuristicTree(timer, true);
             timer.Restart();
@@ -185,9 +222,10 @@ namespace AN_Project
                 }
             }
             timer.Reset();
-            allRecTreeNodes = bestTree.Root.AllRecTreeNodes;
-            RecursiveTreeState heurInitState = new RecursiveTreeState(bestTree);
-            bestStateSoFar = sa.Search(heurInitState);
+            //allRecTreeNodes = bestTree.Root.AllRecTreeNodes;
+            RecreateTree(bestTree.ToString());
+            heurInitState = new RecursiveTreeState(allRecTreeNodes[0].Root);
+            bestStateSoFar = sa.Search(heurInitState, stopwatch);
             Console.Write(bestStateSoFar);
             stopwatch.Reset();
         }
@@ -200,7 +238,7 @@ namespace AN_Project
             string output = recTree.ToString();
             Console.Write(output);
         }
-        
+
         private static void RunExactConsole()
         {
             Node[] inputAsNodes = IO.ReadInputAsNodes();
