@@ -30,7 +30,9 @@ namespace AN_Project
 
         private RecursiveTree<Node> RecGetFastHeuristicTree(Node[] nodes, HashSet<Node> ancestors, int left, int right, Stopwatch timer, bool fast) // Left inclusive, right exclusive
         {
-            if (timer.Elapsed.TotalSeconds >= Program.MAX_TIME_INITIAL_SOLUTIONS_SECONDS)
+            double maxTime = Program.MAX_TIME_INITIAL_SOLUTIONS_SECONDS;
+            if (!fast) maxTime *= 2;
+            if (timer.Elapsed.TotalSeconds >= maxTime)
             {
                 return CreateLine(nodes.Skip(left).Take(right - left).ToList());
             }
@@ -45,7 +47,7 @@ namespace AN_Project
                 nodesAsHash.UnionWith(subArray);
                 foreach (Node n in subArray) //TODO implement heuristic instead of this (incorporate this in heuristic)
                 {
-                    int nRemainingDegree = n.RemainingDegree(nodesAsHash);
+                    int nRemainingDegree = n.RemainingDegree(nodesAsHash) + n.CenterResemblance;
                     if (nRemainingDegree > maxDegree)
                     {
                         maxDegree = nRemainingDegree;

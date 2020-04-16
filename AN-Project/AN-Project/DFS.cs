@@ -63,51 +63,55 @@ namespace AN_Project
             return retList;
         }
 
-        /*
         public static List<Node> ArticulationPoints(int numberOfNodes, Node node, HashSet<Node> beenList = null)
         {
             List<Node> retList = new List<Node>();
+
+            if (beenList == null) beenList = new HashSet<Node>();
+
             int time = 0;
             int[] discoveryTime = new int[numberOfNodes];
             int[] low = new int[numberOfNodes];
+            Node[] parents = new Node[numberOfNodes];
 
-            return RecArticulationPoints(discoveryTime, low, time, node, null, beenList);
+            RecArticulationPoints(discoveryTime, low, time, node, parents, beenList, retList);
+
+            return retList;
         }
 
-        private static List<Node> RecArticulationPoints(int[] discoveryTime, int[] low, int time, Node node, Node parent, HashSet<Node> beenList = null)
+        private static void RecArticulationPoints(int[] discoveryTime, int[] low, int time, Node node, Node[] parents, HashSet<Node> beenList, List<Node> articulationPoints)
         {
-            beenList.Add(node);
-            discoveryTime[node.Number] = time + 1;
-            low[node.Number] = time + 1;
+            beenList.Add(node); 
+            time++;
+            discoveryTime[node.Number - 1] = time;
+            low[node.Number - 1] = time;
 
             int childNumber = 0;
             foreach (Node neighbour in node.ConnectedNodes)
             {
-                if (neighbour == parent) continue;
-
                 if (!beenList.Contains(neighbour))
                 {
                     childNumber++;
-                    time++;
+                    parents[neighbour.Number - 1] = node;
 
-                    List<Node> resultList = RecArticulationPoints(discoveryTime, low, time, neighbour, node, beenList);
+                    RecArticulationPoints(discoveryTime, low, time, neighbour, parents, beenList, articulationPoints);
 
-                    low[neighbour.Number] = Math.Min(low[neighbour.Number], low[node.Number]);
-                    if (parent == null && childNumber > 1)
+                    low[node.Number - 1] = Math.Min(low[node.Number - 1], low[neighbour.Number - 1]);
+                    
+                    if (parents[node.Number - 1] == null && childNumber > 1)
                     {
-                        resultList.Add(neighbour);
+                        articulationPoints.Add(node);
                     }
-                    else if (parent != null && low[node.Number] >= discoveryTime[neighbour.Number])
+                    else if (parents[node.Number - 1] != null && low[neighbour.Number - 1] >= discoveryTime[node.Number - 1])
                     {
-                        resultList.Add(neighbour);
+                        articulationPoints.Add(node);
                     }
                 }
-                else
+                else if (neighbour != parents[node.Number - 1])
                 {
-                    low[neighbour.Number] = Math.Min(low[neighbour.Number], discoveryTime[node.Number]);
+                    low[node.Number - 1] = Math.Min(low[node.Number - 1], discoveryTime[neighbour.Number - 1]);
                 }
             }
         }
-        */
     }
 }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 
 namespace AN_Project
 {
@@ -8,7 +9,7 @@ namespace AN_Project
     {
         static List<Node> CalculateMaximal(List<Node> graph)
         {
-            graph.Sort();
+            graph = graph.OrderBy(n => n.Degree + n.CenterResemblance).ToList();
             List<Node> retList = new List<Node>();
             HashSet<Node> tabu = new HashSet<Node>();
             for(int i = 0; i < graph.Count; i++)
@@ -94,7 +95,7 @@ namespace AN_Project
                     if (!independentSet.Contains(n))
                     {
                         // If the not was not in the independent set in the last layer, it is present in this layer
-                        Node newNode = new Node(n.Number)
+                        Node newNode = new Node(n.Number, n.CenterResemblance)
                         {
                             ConnectedNodes = new List<Node>()
                         };
@@ -160,7 +161,7 @@ namespace AN_Project
                     if (!isConnectedToAnIndependentSetNode) throw new Exception("wa");
                 }
 
-                if (newNodes.Count * (newNodes.Count - 1) / 2 == totalEdges || timer.Elapsed.TotalSeconds >= Program.MAX_TIME_INITIAL_SOLUTIONS_SECONDS)
+                if (newNodes.Count * (newNodes.Count - 1) / 2 == totalEdges || timer.Elapsed.TotalSeconds >= Program.MAX_TIME_INITIAL_SOLUTIONS_SECONDS * 3)
                 {
                     RecursiveTree<Node> cliqueTreeLeaf = CreateLine(newNodes);
                     foreach (RecursiveTree<Node> tree in treesFromNodes)

@@ -14,7 +14,7 @@ namespace AN_Project
         /// </summary>
         /// <param name="path">The file to read the input from</param>
         /// <returns>An array with all nodes that have been made</returns>
-        public static Node[] ReadInputAsNodes(string path)
+        public static Node[] ReadInputAsNodes(string path, int centerResemblanceCap)
         {
             int numberOfNodes = -1;
             int numberOfEdges = -1;
@@ -28,10 +28,12 @@ namespace AN_Project
                 string line;
                 while ((line = streamReader.ReadLine()) != null)
                 {
-                    HandleLine(line, ref numberOfNodes, ref numberOfEdges, ref counter, allNodes);
+                    HandleLine(line, ref numberOfNodes, ref numberOfEdges, ref counter, ref allNodes);
                 }
             }
 
+            if (allNodes.Length < centerResemblanceCap) CalculateCenterResemblances(allNodes);
+            CalculateArticulationPoints(allNodes);
             return allNodes;
         }
 
@@ -39,7 +41,7 @@ namespace AN_Project
         /// Read an instance from console input
         /// </summary>
         /// <returns>An array with all nodes that have been made</returns>
-        public static Node[] ReadInputAsNodes()
+        public static Node[] ReadInputAsNodes(int centerResemblanceCap)
         {
             int numberOfNodes = -1;
             int numberOfEdges = int.MaxValue;
@@ -51,9 +53,10 @@ namespace AN_Project
             while (numberOfEdgesRead < numberOfEdges)
             {
                 line = Console.ReadLine();
-                HandleLine(line, ref numberOfNodes, ref numberOfEdges, ref numberOfEdgesRead, allNodes);
+                HandleLine(line, ref numberOfNodes, ref numberOfEdges, ref numberOfEdgesRead, ref allNodes);
             }
-
+            if (allNodes.Length < centerResemblanceCap) CalculateCenterResemblances(allNodes);
+            CalculateArticulationPoints(allNodes);
             return allNodes;
         }
 
@@ -65,7 +68,7 @@ namespace AN_Project
         /// <param name="numberOfEdges">The number of edges variable, can get a value because of this line</param>
         /// <param name="numberOfEdgesRead">The number of edges read</param>
         /// <param name="allNodes">The result array with all nodes</param>
-        private static void HandleLine(string line, ref int numberOfNodes, ref int numberOfEdges, ref int numberOfEdgesRead, Node[] allNodes)
+        private static void HandleLine(string line, ref int numberOfNodes, ref int numberOfEdges, ref int numberOfEdgesRead, ref Node[] allNodes)
         {
             // Split the line
             string[] splittedLine = line.Split();
@@ -100,6 +103,24 @@ namespace AN_Project
 
                 allNodes[origin].ConnectedNodes.Add(allNodes[destination]);
                 allNodes[destination].ConnectedNodes.Add(allNodes[origin]);
+            }
+        }
+
+        private static void CalculateCenterResemblances(Node[] allNodes)
+        {
+            int[] centerResemblances = FloydWarshall.CenterResemblances(allNodes);
+            for (int i = 0; i < allNodes.Length; i++)
+            {
+                allNodes[i].CenterResemblance = centerResemblances[i];
+            }
+        }
+
+        private static void CalculateArticulationPoints(Node[] allNodes)
+        {
+            List<Node> articulationPoints = DFS.ArticulationPoints(allNodes.Length, allNodes[0]);
+            foreach (Node node in articulationPoints)
+            {
+                node.ArticulationPointValue = 1;
             }
         }
     }

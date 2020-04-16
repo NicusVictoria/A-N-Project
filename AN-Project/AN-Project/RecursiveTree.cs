@@ -76,11 +76,16 @@ namespace AN_Project
         {
             get
             {
-                // TODO: make way more efficient
                 List<RecursiveTree<V>> retList = new List<RecursiveTree<V>>() { this };
-                foreach(RecursiveTree<V> child in Children)
+                Stack<RecursiveTree<V>> stack = new Stack<RecursiveTree<V>>(ChildrenList);
+                while (stack.Count != 0)
                 {
-                    retList.AddRange(child.AllRecTreeNodesInSubtree);
+                    RecursiveTree<V> current = stack.Pop();
+                    foreach (RecursiveTree<V> child in current.Children)
+                    {
+                        stack.Push(child);
+                    }
+                    retList.Add(current);
                 }
                 return retList;
             }
@@ -93,11 +98,16 @@ namespace AN_Project
         {
             get
             {
-                // TODO: make way more efficient
                 List<V> retList = new List<V>() { Value };
-                foreach (RecursiveTree<V> child in Children)
+                Stack<RecursiveTree<V>> stack = new Stack<RecursiveTree<V>>(ChildrenList);
+                while(stack.Count != 0)
                 {
-                    retList.AddRange(child.AllNodesInSubtree);
+                    RecursiveTree<V> current = stack.Pop();
+                    foreach(RecursiveTree<V> child in current.Children)
+                    {
+                        stack.Push(child);
+                    }
+                    retList.Add(current.Value);
                 }
                 return retList;
             }

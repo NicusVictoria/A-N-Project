@@ -12,17 +12,32 @@ namespace AN_Project
         /// <summary>
         /// The maximum time initial solutions can use
         /// </summary>
-        public const int MAX_TIME_INITIAL_SOLUTIONS_SECONDS = 480; // 480 sec = 8 minutes
+        public const int MAX_TIME_INITIAL_SOLUTIONS_SECONDS = 10; // 480 sec = 8 minutes
 
         /// <summary>
         /// The maximum total the program is allowed to use for a single instance
         /// </summary>
-        public const int MAX_TIME_TOTAL_SECONDS = 1680; // 1680 sec = 28 minutes
+        public const int MAX_TIME_TOTAL_SECONDS = 0; // 1680 sec = 28 minutes
+
+        /// <summary>
+        /// If the number of nodes is bigger than this value, no faster heuristic is used for the inital solutions
+        /// </summary>
+        private const int FASTER_HEURISTIC_CAP = 1500000;
+
+        /// <summary>
+        /// If the number of nodes is bigger than this value, no fast heuristic is used for the inital solutions
+        /// </summary>
+        private const int FAST_HEURISTIC_CAP = 1000000;
 
         /// <summary>
         /// If the number of nodes is bigger than this value, no independent set is used for the inital solutions
         /// </summary>
-        private const int INDEPENDENT_SET_THRESHOLD = 100000;
+        private const int INDEPENDENT_SET_CAP = 100000;
+
+        /// <summary>
+        /// If the number of nodes is bigger than this value, center resemblance is not used in the heuristic
+        /// </summary>
+        private const int CENTER_RESEMBLANCE_CAP = 50000;
 
         /// <summary>
         /// Start temperature for Simulated Annealing
@@ -88,16 +103,16 @@ namespace AN_Project
 
             // Multiple run modes, select one and comment the rest
 
-            parameterizedThreadStart = new ParameterizedThreadStart((q) => RunSimAnnealingConsole());
+            //parameterizedThreadStart = new ParameterizedThreadStart((q) => RunSimAnnealingConsole());
             //parameterizedThreadStart = new ParameterizedThreadStart((q) => RunHeuristicConsole());
             //parameterizedThreadStart = new ParameterizedThreadStart((q) => RunExactConsole());
 
-            string fileName = "heur_187";
+            string fileName = "heur_199";
             //parameterizedThreadStart = new ParameterizedThreadStart((q) => RunSimAnnealing(fileName));
             //parameterizedThreadStart = new ParameterizedThreadStart((q) => Run(fileName, true));
             //parameterizedThreadStart = new ParameterizedThreadStart((q) => Run(fileName, false));
 
-            //parameterizedThreadStart = new ParameterizedThreadStart((q) => RunAllSimAnnealing());
+            parameterizedThreadStart = new ParameterizedThreadStart((q) => RunAllSimAnnealing());
             //parameterizedThreadStart = new ParameterizedThreadStart((q) => RunAllHeuristic());
             //parameterizedThreadStart = new ParameterizedThreadStart((q) => RunAllExact());
 
@@ -145,7 +160,7 @@ namespace AN_Project
         {
             Console.WriteLine($"Starting file {fileName}...");
 
-            Node[] inputAsNodes = IO.ReadInputAsNodes($"..\\..\\..\\..\\..\\Testcases\\{fileName}.gr");
+            Node[] inputAsNodes = IO.ReadInputAsNodes($"..\\..\\..\\..\\..\\Testcases\\{fileName}.gr", CENTER_RESEMBLANCE_CAP);
             RecursiveSplit recSplit = new RecursiveSplit(inputAsNodes);
 
             RecursiveTree<Node> recTree;
@@ -205,11 +220,11 @@ namespace AN_Project
             Node[] inputAsNodes;
             if (!console)
             {
-                inputAsNodes = IO.ReadInputAsNodes($"..\\..\\..\\..\\..\\Testcases\\{fileName}.gr");
+                inputAsNodes = IO.ReadInputAsNodes($"..\\..\\..\\..\\..\\Testcases\\{fileName}.gr", CENTER_RESEMBLANCE_CAP);
             }
             else
             {
-                inputAsNodes = IO.ReadInputAsNodes();
+                inputAsNodes = IO.ReadInputAsNodes(CENTER_RESEMBLANCE_CAP);
             }
             allNodes = inputAsNodes.ToList();
 
@@ -226,32 +241,37 @@ namespace AN_Project
                 Console.WriteLine($"Line found with depth {heurInitState.Data.Root.Depth}.");
             }
 
+            RecursiveTree<Node> bestTree = null;
             // Find an initial solution using the RecursiveSplit using a fast but bad heuristic
-            initialSolutionsTimer.Start();
-            RecursiveTree<Node> bestTree = recursiveSplit.GetFastHeuristicTree(initialSolutionsTimer, true);
-            if (!console)
+            if (allNodes.Count <= FASTER_HEURISTIC_CAP)
             {
-                Console.WriteLine($"Fastest heuristic tree found with depth {bestTree.Depth}.");
+                initialSolutionsTimer.Start();
+                bestTree = recursiveSplit.GetFastHeuristicTree(initialSolutionsTimer, true);
+                if (!console)
+                {
+                    Console.WriteLine($"Fastest heuristic tree found with depth {bestTree.Depth}.");
+                }
             }
 
             // Find an initial solution using the RecursiveSplit using a decent but pretty slow heuristic
-            initialSolutionsTimer.Restart();
-            RecursiveTree<Node> treeFromFastHeuristic = recursiveSplit.GetFastHeuristicTree(initialSolutionsTimer, false);
-            if (treeFromFastHeuristic.Depth < bestTree.Depth)
+            if (allNodes.Count <= FAST_HEURISTIC_CAP)
             {
-                bestTree = treeFromFastHeuristic;
-            }
-            if (!console)
-            {
-                Console.WriteLine($"Fast heuristic tree found with depth {treeFromFastHeuristic.Depth}.");
+                RecursiveTree<Node> treeFromFastHeuristic = recursiveSplit.GetFastHeuristicTree(initialSolutionsTimer, false);
+                if (bestTree == null || treeFromFastHeuristic.Depth < bestTree.Depth)
+                {
+                    bestTree = treeFromFastHeuristic;
+                }
+                if (!console)
+                {
+                    Console.WriteLine($"Fast heuristic tree found with depth {treeFromFastHeuristic.Depth}.");
+                }
             }
 
             // If the problem instance is small enough, we would like to try to find an initial solution using independent sets
-            if (allNodes.Count <= INDEPENDENT_SET_THRESHOLD)
+            if (allNodes.Count <= INDEPENDENT_SET_CAP)
             {
-                initialSolutionsTimer.Restart();
                 RecursiveTree<Node> treeFromIndependentSet = IndependentSet.TreeFromIndependentSets(allNodes, initialSolutionsTimer);
-                if (treeFromIndependentSet.Depth < bestTree.Depth)
+                if (bestTree == null || treeFromIndependentSet.Depth < bestTree.Depth)
                 {
                     bestTree = treeFromIndependentSet;
                 }
@@ -263,8 +283,11 @@ namespace AN_Project
 
             // Recreate the tree and save the best found initial solution as the initial solution for simulated annealing
             initialSolutionsTimer.Reset();
-            RecreateTree(bestTree.ToString());
-            heurInitState = new RecursiveTreeState(allRecTreeNodes[0].Root, random);
+            if (bestTree != null)
+            {
+                RecreateTree(bestTree.ToString());
+                heurInitState = new RecursiveTreeState(allRecTreeNodes[0].Root, random);
+            }
             simulatedAnnealing.Search(heurInitState, ref bestStateSoFar);
 
             // If the input from the console is not used, write the output to a file, otherwise write it back to the console
@@ -298,7 +321,7 @@ namespace AN_Project
         /// </summary>
         private static void RunHeuristicConsole()
         {
-            Node[] inputAsNodes = IO.ReadInputAsNodes();
+            Node[] inputAsNodes = IO.ReadInputAsNodes(CENTER_RESEMBLANCE_CAP);
             RecursiveSplit recSplit = new RecursiveSplit(inputAsNodes);
             RecursiveTree<Node> recTree = recSplit.GetHeuristicTree();
             string output = recTree.ToString();
@@ -310,7 +333,7 @@ namespace AN_Project
         /// </summary>
         private static void RunExactConsole()
         {
-            Node[] inputAsNodes = IO.ReadInputAsNodes();
+            Node[] inputAsNodes = IO.ReadInputAsNodes(CENTER_RESEMBLANCE_CAP);
             RecursiveSplit recSplit = new RecursiveSplit(inputAsNodes);
             RecursiveTree<Node> recTree = recSplit.GetBestTree();
             string output = recTree.ToString();

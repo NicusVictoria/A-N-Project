@@ -46,18 +46,26 @@ namespace AN_Project
         /// </summary>
         public int Degree { get { return ConnectedNodes.Count; } }
 
+        private int centerResemblance;
+        public int CenterResemblance { get { return centerResemblance; } set { centerResemblance = value / 2; } }
+
+        private int articulationpointValue;
+        public int ArticulationPointValue { get { return articulationpointValue; } set {articulationpointValue = value * 3; } }
+
         /// <summary>
         /// A measure for how good it is to choose this node for certain operations
         /// </summary>
-        public double Heuristic { get { return Degree; } } //TODO improve this
+        public double Heuristic { get { return Degree + CenterResemblance + ArticulationPointValue; } } //TODO improve this
 
         /// <summary>
         /// Constructor for a node
         /// </summary>
         /// <param name="number">The number of this node</param>
-        public Node(int number)
+        public Node(int number, int centerResemblance = 0, int articulationPointValue = 0)
         {
             Number = number;
+            CenterResemblance = centerResemblance;
+            ArticulationPointValue = articulationPointValue;
         }
 
         /// <summary>
