@@ -9,9 +9,6 @@ namespace AN_Project
     /// <typeparam name="D"></typeparam>
     abstract class ElementaryNeighbourOperation<D>
     {
-        // TODO: Do we want this function or not?
-        //public abstract double Delta();
-
         /// <summary>
         /// The revert of an operation
         /// </summary>

@@ -34,13 +34,16 @@ namespace AN_Project
         /// </summary>
         private Random Random { get; }
 
+        private double[] CumulativeHeuristic { get; }
+
         /// <summary>
         /// Constructor for the MoveUpNeighbourSpace
         /// </summary>
         /// <param name="random">The random to be used</param>
-        public MoveUpNeighbourSpace(Random random)
+        public MoveUpNeighbourSpace(Random random, double[] cumulativeHeuristic)
         {
             Random = random;
+            CumulativeHeuristic = cumulativeHeuristic;
         }
 
         public List<Neighbour<RecursiveTree<Node>>> GetAllNeighbours(RecursiveTree<Node> data)
@@ -50,6 +53,7 @@ namespace AN_Project
 
         public Neighbour<RecursiveTree<Node>> GetRandomNeighbour(RecursiveTree<Node> data)
         {
+            /* // TODO: might not be used
             // Grab a random tree that is not the root
             RecursiveTree<Node> root = Program.allRecTreeNodes[0].Root;
             RecursiveTree<Node> randomTree = null;
@@ -71,6 +75,38 @@ namespace AN_Project
 
             // Return a new neighbour with the randomly found tree and one of its ancestors
             return new MoveUpNeighbour(randomTree, randomParent);
+            */
+
+            // Grab a random tree that is not the root
+            RecursiveTree<Node> root = Program.allRecTreeNodes[0].Root;
+            RecursiveTree<Node> randomTree = null;
+            while (randomTree == root || randomTree == null)
+            {
+                randomTree = GetGuidedMoveUpNode();
+            }
+
+            // Grab a random ancestor of this tree
+            List<RecursiveTree<Node>> ancestors = new List<RecursiveTree<Node>>();
+            RecursiveTree<Node> parent = randomTree.Parent.Parent;
+            while (parent != null)
+            {
+                ancestors.Add(parent);
+                parent = parent.Parent;
+            }
+            ancestors.Add(null);
+            RecursiveTree<Node> randomParent = ancestors[Random.Next(ancestors.Count)];
+
+            // Return a new neighbour with the randomly found tree and one of its ancestors
+            return new MoveUpNeighbour(randomTree, randomParent);
+        }
+
+        private RecursiveTree<Node> GetGuidedMoveUpNode()
+        {
+            double totalHeuristic = CumulativeHeuristic[CumulativeHeuristic.Length - 1];
+            double random = Random.NextDouble() * totalHeuristic;
+            int index = Array.BinarySearch(CumulativeHeuristic, random);
+            if (index < 0) index = -1 - index;
+            return Program.allRecTreeNodes[index];
         }
     }
 
@@ -84,13 +120,16 @@ namespace AN_Project
         /// </summary>
         private Random Random { get; }
 
+        private double[] CumulativeHeuristic { get; }
+
         /// <summary>
         /// Constructor for a SplitNeighbourSpace
         /// </summary>
         /// <param name="random">The random to be used</param>
-        public SplitNeighbourSpace(Random random)
+        public SplitNeighbourSpace(Random random, double[] cumulativeHeuristic)
         {
             Random = random;
+            CumulativeHeuristic = cumulativeHeuristic;
         }
 
         public List<Neighbour<RecursiveTree<Node>>> GetAllNeighbours(RecursiveTree<Node> data)
@@ -104,9 +143,18 @@ namespace AN_Project
             RecursiveTree<Node> randomTree = null;
             while (randomTree == null || randomTree.Children.Count == 0)
             {
-                randomTree = Program.allRecTreeNodes[Random.Next(Program.allRecTreeNodes.Count)];
+                randomTree = GetGuidedSplitNode();//Program.allRecTreeNodes[Random.Next(Program.allRecTreeNodes.Count)];
             }
             return new SplitNeighbour(randomTree);
+        }
+
+        private RecursiveTree<Node> GetGuidedSplitNode()
+        {
+            double totalHeuristic = CumulativeHeuristic[CumulativeHeuristic.Length - 1];
+            double random = Random.NextDouble() * totalHeuristic;
+            int index = Array.BinarySearch(CumulativeHeuristic, random);
+            if (index < 0) index = -1 - index;
+            return Program.allRecTreeNodes[index];
         }
     }
 
@@ -129,10 +177,10 @@ namespace AN_Project
         /// Constructor for a MoveAndSplitNeighbourSpace
         /// </summary>
         /// <param name="random">The random to be used</param>
-        public MoveAndSplitNeighbourSpace(Random random)
+        public MoveAndSplitNeighbourSpace(Random random, double[] cumulativeHeuristic)
         {
             Random = random;
-            MoveUpNeighbourSpace = new MoveUpNeighbourSpace(Random);
+            MoveUpNeighbourSpace = new MoveUpNeighbourSpace(Random, cumulativeHeuristic);
         }
 
         public List<Neighbour<RecursiveTree<Node>>> GetAllNeighbours(RecursiveTree<Node> data)
@@ -180,12 +228,12 @@ namespace AN_Project
         /// </summary>
         /// <param name="random">The random to be used</param>
         /// <param name="splits">The number SplitNeighbours to be generated</param>
-        public RandomMoveAndSplitNeighbourSpace(Random random, int splits)
+        public RandomMoveAndSplitNeighbourSpace(Random random, int splits, double[] cumulativeHeuristic)
         {
             Random = random;
             Splits = splits;
-            MoveUpNeighbourSpace = new MoveUpNeighbourSpace(Random);
-            SplitNeighbourSpace = new SplitNeighbourSpace(Random);
+            MoveUpNeighbourSpace = new MoveUpNeighbourSpace(Random, cumulativeHeuristic);
+            SplitNeighbourSpace = new SplitNeighbourSpace(Random, cumulativeHeuristic);
         }
 
         public List<Neighbour<RecursiveTree<Node>>> GetAllNeighbours(RecursiveTree<Node> data)

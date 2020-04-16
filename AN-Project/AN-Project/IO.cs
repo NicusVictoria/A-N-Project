@@ -14,7 +14,7 @@ namespace AN_Project
         /// </summary>
         /// <param name="path">The file to read the input from</param>
         /// <returns>An array with all nodes that have been made</returns>
-        public static Node[] ReadInputAsNodes(string path, int centerResemblanceCap)
+        public static Node[] ReadInputAsNodes(string path, int centerResemblanceCap, int articulationPointMinimum)
         {
             int numberOfNodes = -1;
             int numberOfEdges = -1;
@@ -33,7 +33,7 @@ namespace AN_Project
             }
 
             // Calculate some extra values to be used in the heuristics
-            PrecomputeHeuristicValues(allNodes, centerResemblanceCap);
+            PrecomputeHeuristicValues(allNodes, centerResemblanceCap, articulationPointMinimum);
             return allNodes;
         }
 
@@ -41,7 +41,7 @@ namespace AN_Project
         /// Read an instance from console input
         /// </summary>
         /// <returns>An array with all nodes that have been made</returns>
-        public static Node[] ReadInputAsNodes(int centerResemblanceCap)
+        public static Node[] ReadInputAsNodes(int centerResemblanceCap, int articulationPointMinimum)
         {
             int numberOfNodes = -1;
             int numberOfEdges = int.MaxValue;
@@ -57,7 +57,7 @@ namespace AN_Project
             }
 
             // Calculate some extra values to be used in the heuristics
-            PrecomputeHeuristicValues(allNodes, centerResemblanceCap);
+            PrecomputeHeuristicValues(allNodes, centerResemblanceCap, articulationPointMinimum);
             return allNodes;
         }
 
@@ -112,10 +112,10 @@ namespace AN_Project
         /// </summary>
         /// <param name="allNodes">All the nodes in the graoh</param>
         /// <param name="centerResemblanceCap">The maximum number of nodes for which the center resemblance is computed</param>
-        private static void PrecomputeHeuristicValues(Node[] allNodes, int centerResemblanceCap)
+        private static void PrecomputeHeuristicValues(Node[] allNodes, int centerResemblanceCap, int articulationPointMinimum)
         {
-            if (allNodes.Length <= centerResemblanceCap) CalculateCenterResemblances(allNodes);
-            CalculateArticulationPoints(allNodes);
+            // if (allNodes.Length <= centerResemblanceCap) CalculateCenterResemblances(allNodes); // TODO: not used anyways :)
+            // if (allNodes.Length >= articulationPointMinimum) CalculateArticulationPoints(allNodes); // TODO: not used anyways :)
         }
 
         /// <summary>

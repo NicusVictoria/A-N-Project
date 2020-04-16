@@ -46,15 +46,16 @@ namespace AN_Project
             if (fast) selectedNode = subArray.Max();
             else
             {
-                int maxDegree = -1;
+                double maxHeuristic = -1;
                 nodesAsHash.Clear();
                 nodesAsHash.UnionWith(subArray);
-                foreach (Node n in subArray) //TODO implement heuristic instead of this (incorporate this in heuristic)
+
+                foreach (Node n in subArray)
                 {
-                    int nRemainingDegree = n.RemainingDegree(nodesAsHash) + n.CenterResemblance;
-                    if (nRemainingDegree > maxDegree)
+                    double nRemainingDegree = n.RemainingDegree(nodesAsHash) + n.CenterResemblance;
+                    if (nRemainingDegree > maxHeuristic)
                     {
-                        maxDegree = nRemainingDegree;
+                        maxHeuristic = nRemainingDegree;
                         selectedNode = n;
                     }
                 }
@@ -116,7 +117,7 @@ namespace AN_Project
         {
             // BESTFOUNDSOLUTION IS HOEVEEL ONDER DIT NIVEAU HET GELIJK ZOU ZIJN AAN DE MINIMAAL GEVONDEN DEPTH
 
-            if (bestFoundSolution < parents.Count + 1/*Nodes.Min(n => n.RemainingDegree(nodesAsHash))*/) //TODO not entirely sure if correct
+            if (bestFoundSolution < parents.Count + 1)
             {
                 return null;
             }
@@ -184,7 +185,6 @@ namespace AN_Project
             byte[] bytes = new byte[(int)Math.Ceiling(allNodes.Length / 8f)];
             for (int i = 0; i < nodes.Count; i++)
             {
-                //if (i == nodeNumber) continue;
                 int bitIndex = nodes[i].Number - 1;
                 int byteIndex = bitIndex / 8;
                 byte bitInByteIndex = (byte)(bitIndex % 8);

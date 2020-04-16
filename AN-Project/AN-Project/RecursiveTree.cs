@@ -198,24 +198,7 @@ namespace AN_Project
         /// <param name="children">The list of children to be added</param>
         public void AddChildren(IEnumerable<RecursiveTree<V>> children)
         {
-            //Debug.Assert(!CheckForParentLoop()); //TODO remove this, very expensive, just for debug purposes.
             ChildrenList.AddRange(children);
-        }
-
-        /// <summary>
-        /// Checks the ancestors of this RecursiveTree for a loop
-        /// </summary>
-        /// <returns>Whether a loop in this RecursiveTree's ancestors is found</returns>
-        public bool CheckForParentLoop()
-        {
-            // TODO: delete this method if not used?
-            RecursiveTree<V> parent = Parent;
-            while(parent != null)
-            {
-                if (parent == this) return true;
-                parent = parent.Parent;
-            }
-            return false;
         }
 
         /// <summary>
@@ -245,8 +228,7 @@ namespace AN_Project
         /// </summary>
         public void RemoveAllChildren()
         {
-            // TODO: maybe clear instead of new list?
-            ChildrenList = new List<RecursiveTree<V>>();
+            ChildrenList.Clear();
         }
     
         public override string ToString()

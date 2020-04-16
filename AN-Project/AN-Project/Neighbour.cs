@@ -39,24 +39,6 @@ namespace AN_Project
         public abstract double Delta();
     }
 
-    // TODO: can this be removed?
-    /*
-    class NeighbourFromList<D> : Neighbour<D>
-    {
-        //Stack<ElementaryOperation<D>> newOperations;
-
-        public NeighbourFromList(Stack<ElementaryOperation<D>> newOperations)
-        {
-            this.operations = newOperations;
-        }
-
-        public override D Apply()
-        {
-            
-        }
-    }
-    */
-
     /// <summary>
     /// A neighbour consisting of multiple neighbours executed in order
     /// </summary>

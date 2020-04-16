@@ -67,7 +67,7 @@ namespace AN_Project
         /// Find all articulation points in a graph
         /// </summary>
         /// <param name="numberOfNodes">The total number of nodes in the graph</param>
-        /// <param name="node">An arbitrary node in the gr</param>
+        /// <param name="node">An arbitrary node in the graph</param>
         /// <param name="beenList">A list with nodes that already have been visited</param>
         /// <returns>A list with articulation points</returns>
         public static List<Node> ArticulationPoints(int numberOfNodes, Node node, HashSet<Node> beenList = null)
@@ -82,7 +82,6 @@ namespace AN_Project
             int[] low = new int[numberOfNodes];
             Node[] parents = new Node[numberOfNodes];
 
-            // TODO: kunnen we hier misschien toch een for-loop van maken over alle nodes? Dingen die hij al tegen is gekomen worden toch niet gevonden, en mocht de graaf wel disconnected zijn dan kunnen we actually ook alles vinden dan, nu niet
             // Find all articulation points recursively
             RecArticulationPoints(discoveryTime, low, time, node, parents, beenList, articulationPoints);
 
