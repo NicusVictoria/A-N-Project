@@ -24,16 +24,19 @@ namespace AN_Project
         /// </summary>
         protected abstract List<Tuple<INeighbourSpace<S>, double>> NeighbourSpaces { get; }
 
+        /// <summary>
+        /// The random used
+        /// </summary>
         protected Random Random { get; }
 
         /// <summary>
         /// Constructor for a state
         /// </summary>
-        /// <param name="Data">The initial data to use</param>
+        /// <param name="data">The initial data to use</param>
         /// <param name="random">An arbitrary instance of random</param>
-        public State(S Data, Random random)
+        public State(S data, Random random)
         {
-            this.Data = Data;
+            this.Data = data;
             Random = random;
         }
 

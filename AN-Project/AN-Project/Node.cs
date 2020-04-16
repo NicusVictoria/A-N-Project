@@ -34,6 +34,12 @@ namespace AN_Project
     /// </summary>
     public class Node : INode<Node>, IComparable<Node>
     {
+        private const double CENTER_RESEMBLANCE_MULTIPLIER = 0.5;
+        private const double ARTICULATION_POINT_MULTIPLIER = 3;
+
+        private int centerResemblance;
+        private int articulationPointValue;
+
         /// <summary>
         /// The number of this node
         /// </summary>
@@ -46,11 +52,15 @@ namespace AN_Project
         /// </summary>
         public int Degree { get { return ConnectedNodes.Count; } }
 
-        private int centerResemblance;
-        public int CenterResemblance { get { return centerResemblance; } set { centerResemblance = value / 2; } }
+        /// <summary>
+        /// Measure for how much this node resembles a center of the graph. Higher is better
+        /// </summary>
+        public int CenterResemblance { get { return centerResemblance; } set { centerResemblance = (int)(value * CENTER_RESEMBLANCE_MULTIPLIER); } }
 
-        private int articulationpointValue;
-        public int ArticulationPointValue { get { return articulationpointValue; } set {articulationpointValue = value * 3; } }
+        /// <summary>
+        /// Whether this point is an articulation point, and its value. 0 is no articulation point, >0 is an articulation point.
+        /// </summary>
+        public int ArticulationPointValue { get { return articulationPointValue; } set {articulationPointValue = (int)(value * ARTICULATION_POINT_MULTIPLIER); } }
 
         /// <summary>
         /// A measure for how good it is to choose this node for certain operations
@@ -61,6 +71,8 @@ namespace AN_Project
         /// Constructor for a node
         /// </summary>
         /// <param name="number">The number of this node</param>
+        /// <param name="centerResemblance">How much this node resembles the center of a graph. Higher value means it resembles the center more</param>
+        /// <param name="articulationPointValue">Whether this point is an articulation point. Use 0 for no articulation point, 1 for articulation point</param>
         public Node(int number, int centerResemblance = 0, int articulationPointValue = 0)
         {
             Number = number;

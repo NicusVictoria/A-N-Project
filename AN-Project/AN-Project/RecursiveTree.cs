@@ -229,6 +229,18 @@ namespace AN_Project
         }
 
         /// <summary>
+        /// Removes multiple children from this RecursiveTree
+        /// </summary>
+        /// <param name="children">The children to be removed</param>
+        public void RemoveChildren(IEnumerable<RecursiveTree<V>> children)
+        {
+            foreach (RecursiveTree<V> child in children)
+            {
+                RemoveChild(child);
+            }
+        }
+
+        /// <summary>
         /// Remove all children of this RecursiveTree
         /// </summary>
         public void RemoveAllChildren()

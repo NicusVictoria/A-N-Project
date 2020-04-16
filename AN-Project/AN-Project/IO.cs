@@ -32,8 +32,8 @@ namespace AN_Project
                 }
             }
 
-            if (allNodes.Length < centerResemblanceCap) CalculateCenterResemblances(allNodes);
-            CalculateArticulationPoints(allNodes);
+            // Calculate some extra values to be used in the heuristics
+            PrecomputeHeuristicValues(allNodes, centerResemblanceCap);
             return allNodes;
         }
 
@@ -55,8 +55,9 @@ namespace AN_Project
                 line = Console.ReadLine();
                 HandleLine(line, ref numberOfNodes, ref numberOfEdges, ref numberOfEdgesRead, ref allNodes);
             }
-            if (allNodes.Length < centerResemblanceCap) CalculateCenterResemblances(allNodes);
-            CalculateArticulationPoints(allNodes);
+
+            // Calculate some extra values to be used in the heuristics
+            PrecomputeHeuristicValues(allNodes, centerResemblanceCap);
             return allNodes;
         }
 
@@ -106,6 +107,21 @@ namespace AN_Project
             }
         }
 
+        /// <summary>
+        /// Computes all possible values used in more complex heuristics for nodes
+        /// </summary>
+        /// <param name="allNodes">All the nodes in the graoh</param>
+        /// <param name="centerResemblanceCap">The maximum number of nodes for which the center resemblance is computed</param>
+        private static void PrecomputeHeuristicValues(Node[] allNodes, int centerResemblanceCap)
+        {
+            if (allNodes.Length <= centerResemblanceCap) CalculateCenterResemblances(allNodes);
+            CalculateArticulationPoints(allNodes);
+        }
+
+        /// <summary>
+        /// Computes the center resemblance for the given nodes
+        /// </summary>
+        /// <param name="allNodes">The nodes for which to compute the center resemblance</param>
         private static void CalculateCenterResemblances(Node[] allNodes)
         {
             int[] centerResemblances = FloydWarshall.CenterResemblances(allNodes);
@@ -115,6 +131,10 @@ namespace AN_Project
             }
         }
 
+        /// <summary>
+        /// Finds all the articulation points in the given nodes
+        /// </summary>
+        /// <param name="allNodes">The nodes to look for articulation points in</param>
         private static void CalculateArticulationPoints(Node[] allNodes)
         {
             List<Node> articulationPoints = DFS.ArticulationPoints(allNodes.Length, allNodes[0]);

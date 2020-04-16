@@ -63,39 +63,58 @@ namespace AN_Project
             return retList;
         }
 
+        /// <summary>
+        /// Find all articulation points in a graph
+        /// </summary>
+        /// <param name="numberOfNodes">The total number of nodes in the graph</param>
+        /// <param name="node">An arbitrary node in the gr</param>
+        /// <param name="beenList">A list with nodes that already have been visited</param>
+        /// <returns>A list with articulation points</returns>
         public static List<Node> ArticulationPoints(int numberOfNodes, Node node, HashSet<Node> beenList = null)
         {
-            List<Node> retList = new List<Node>();
+            // Algorithm is based on the code on the following website: https://www.geeksforgeeks.org/articulation-points-or-cut-vertices-in-a-graph/
 
-            if (beenList == null) beenList = new HashSet<Node>();
-
+            // Initialise values
+            if (beenList == null) beenList = new HashSet<Node>(); 
+            List<Node> articulationPoints = new List<Node>();
             int time = 0;
             int[] discoveryTime = new int[numberOfNodes];
             int[] low = new int[numberOfNodes];
             Node[] parents = new Node[numberOfNodes];
 
-            RecArticulationPoints(discoveryTime, low, time, node, parents, beenList, retList);
+            // TODO: kunnen we hier misschien toch een for-loop van maken over alle nodes? Dingen die hij al tegen is gekomen worden toch niet gevonden, en mocht de graaf wel disconnected zijn dan kunnen we actually ook alles vinden dan, nu niet
+            // Find all articulation points recursively
+            RecArticulationPoints(discoveryTime, low, time, node, parents, beenList, articulationPoints);
 
-            return retList;
+            return articulationPoints;
         }
 
+        /// <summary>
+        /// Recursive function for finding the Articulation points
+        /// </summary>
+        /// <param name="discoveryTime">Array containing the discovery times for each node</param>
+        /// <param name="low">The array containing the discovery times of the lowest value in its subtree</param>
+        /// <param name="time">The time</param>
+        /// <param name="node">The node to start looking from</param>
+        /// <param name="parents">An array with the nodes from which a node was discovered</param>
+        /// <param name="beenList">A set of nodes that were already visited</param>
+        /// <param name="articulationPoints">Teh list with all articulation points</param>
         private static void RecArticulationPoints(int[] discoveryTime, int[] low, int time, Node node, Node[] parents, HashSet<Node> beenList, List<Node> articulationPoints)
         {
             beenList.Add(node); 
             time++;
             discoveryTime[node.Number - 1] = time;
             low[node.Number - 1] = time;
-
             int childNumber = 0;
+
             foreach (Node neighbour in node.ConnectedNodes)
             {
+                // If we have not already seen this neighbour, it is now a child of node and we will recurse for this neighbour
                 if (!beenList.Contains(neighbour))
                 {
                     childNumber++;
                     parents[neighbour.Number - 1] = node;
-
                     RecArticulationPoints(discoveryTime, low, time, neighbour, parents, beenList, articulationPoints);
-
                     low[node.Number - 1] = Math.Min(low[node.Number - 1], low[neighbour.Number - 1]);
                     
                     if (parents[node.Number - 1] == null && childNumber > 1)

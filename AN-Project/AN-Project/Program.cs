@@ -37,7 +37,7 @@ namespace AN_Project
         /// <summary>
         /// If the number of nodes is bigger than this value, center resemblance is not used in the heuristic
         /// </summary>
-        private const int CENTER_RESEMBLANCE_CAP = 50000;
+        private const int CENTER_RESEMBLANCE_CAP = 5000;
 
         /// <summary>
         /// Start temperature for Simulated Annealing

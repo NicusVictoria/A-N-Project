@@ -144,7 +144,7 @@ namespace AN_Project
         {
             // Get a random MoveNeighbour, create a new SplitNeighbour on the node that has just been moved up and return the combination of these two
             MoveUpNeighbour move = MoveUpNeighbourSpace.GetRandomNeighbour(data) as MoveUpNeighbour;
-            SplitNeighbour split = new SplitNeighbour(move.moveNode.Parent);
+            SplitNeighbour split = new SplitNeighbour(move.MoveNode.Parent);
             List<Neighbour<RecursiveTree<Node>>> neighbours = new List<Neighbour<RecursiveTree<Node>>>() { move, split };
             return new MultipleNeighbourNeighbour<RecursiveTree<Node>>(neighbours);
         }
