@@ -10,7 +10,7 @@ namespace AN_Project
         /// <summary>
         /// Create a RecursiveTree with all nodes in a single line (each tree has exactly one child, except for the single leaf)
         /// </summary>
-        /// <returns>A RecursiveTree in a line</returns>
+        /// <returns>The root of a RecursiveTree in a line</returns>
         public static RecursiveTree<Node> LineRecursiveTree()
         {
             Program.allRecTreeNodes = new List<RecursiveTree<Node>>();

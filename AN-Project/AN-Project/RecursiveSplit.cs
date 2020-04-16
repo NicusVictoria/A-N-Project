@@ -5,15 +5,21 @@ using System.Diagnostics;
 
 namespace AN_Project
 {
+    /// <summary>
+    /// Class that computes a RecursiveTree by splitting
+    /// </summary>
     class RecursiveSplit
     {
         private readonly Node[] allNodes;
-
         private IEnumerable<Node> subArray;
         private readonly HashSet<Node> beenList;
         private readonly HashSet<Node> nodesAsHash;
         private readonly List<List<Node>> connectedComponents;
 
+        /// <summary>
+        /// Constructor for a RecursiveSplit
+        /// </summary>
+        /// <param name="allNodes">Array of all nodes in the instance</param>
         public RecursiveSplit(Node[] allNodes)
         {
             this.allNodes = allNodes;
@@ -96,67 +102,6 @@ namespace AN_Project
             return newTree;
         }
 
-
-        /// <summary>
-        /// Calculates the treedepth using a heuristic
-        /// </summary>
-        /// <returns>The resulting tree</returns>
-        public RecursiveTree<Node> GetHeuristicTree()
-        {
-            return RecGetHeuristicTree(allNodes.ToList(), new HashSet<Node>());
-        }
-
-        private RecursiveTree<Node> RecGetHeuristicTree(List<Node> Nodes, HashSet<Node> ancestors)
-        {
-            Node selectedNode = null;
-            int maxDegree = 0;
-            HashSet<Node> nodesAsHash = new HashSet<Node>(Nodes);
-            foreach (Node n in Nodes) //TODO implement heuristic instead of this (incorporate this in heuristic)
-            {
-                int nRemainingDegree = n.RemainingDegree(nodesAsHash);
-                if (nRemainingDegree > maxDegree)
-                {
-                    maxDegree = nRemainingDegree;
-                    selectedNode = n;
-                }
-            }
-            //Node selectedNode = Nodes.Max(); 
-            RecursiveTree<Node> newTree = new RecursiveTree<Node>(selectedNode);
-            ancestors.Add(selectedNode);
-            HashSet<Node> beenList = new HashSet<Node>(ancestors);
-            foreach (Node n in Nodes)
-            {
-                if (beenList.Contains(n)) continue;
-                List<Node> connectedNodes = DFS.All(n, (nn) => { return true; }, beenList);
-                RecursiveTree<Node> ChildTree = RecGetHeuristicTree(connectedNodes, new HashSet<Node>(ancestors));
-                ChildTree.Parent = newTree;
-                newTree.AddChild(ChildTree);
-            }
-            return newTree;
-        }
-
-        /// <summary>
-        /// Calculates a BigInteger representation of a set of nodes. This corresponds to a bitstring with 0 if the node is not present here, and 1 if it is present
-        /// </summary>
-        /// <param name="nodes">The nodes to be represented as bitstring</param>
-        /// <param name="nodeNumber">The node that is split on</param>
-        /// <returns>A BigInteger containing the "value" for this set of nodes</returns>
-        private string NodeSubsetRepresentation(List<Node> nodes)
-        {
-            byte[] bytes = new byte[(int)Math.Ceiling(allNodes.Length / 8f)];
-            for (int i = 0; i < nodes.Count; i++)
-            {
-                //if (i == nodeNumber) continue;
-                int bitIndex = nodes[i].Number - 1;
-                int byteIndex = bitIndex / 8;
-                byte bitInByteIndex = (byte)(bitIndex % 8);
-                bytes[byteIndex] |= (byte)(1 << bitInByteIndex);
-            }
-
-            string encodedString = Convert.ToBase64String(bytes);
-            return encodedString;
-        }
-
         /// <summary>
         /// Calculates the treedepth unsing an exact method
         /// </summary>
@@ -184,8 +129,6 @@ namespace AN_Project
                 RecursiveTree<Node> orphan = new RecursiveTree<Node>(checkedSubsets[asBits]);
                 return orphan;
             }
-
-            //bestFoundSolution = allNodes.Length+ 1; // TODO: AAAAAAAAH, remove
 
             HashSet<Node> nodesAsHash = new HashSet<Node>(Nodes);
             Nodes = Nodes.OrderByDescending(n => n.RemainingDegree(nodesAsHash)).ToList();
@@ -234,10 +177,31 @@ namespace AN_Project
         }
 
         /// <summary>
+        /// Calculates an enconded string representation of a set of nodes
+        /// </summary>
+        /// <param name="nodes">The nodes to be represented as encoded string</param>
+        /// <returns>An encoded string containing the "value" for this set of nodes</returns>
+        private string NodeSubsetRepresentation(List<Node> nodes)
+        {
+            byte[] bytes = new byte[(int)Math.Ceiling(allNodes.Length / 8f)];
+            for (int i = 0; i < nodes.Count; i++)
+            {
+                //if (i == nodeNumber) continue;
+                int bitIndex = nodes[i].Number - 1;
+                int byteIndex = bitIndex / 8;
+                byte bitInByteIndex = (byte)(bitIndex % 8);
+                bytes[byteIndex] |= (byte)(1 << bitInByteIndex);
+            }
+
+            string encodedString = Convert.ToBase64String(bytes);
+            return encodedString;
+        }
+
+        /// <summary>
         /// Creates a subtree in the form of a single line from a list of nodes
         /// </summary>
         /// <param name="nodes">The nodes to be in the subtree</param>
-        /// <returns>A subtree with the nodes in a single line</returns>
+        /// <returns>The root of a subtree with the nodes in a single line</returns>
         private RecursiveTree<Node> CreateLine(List<Node> nodes)
         {
             RecursiveTree<Node> root = new RecursiveTree<Node>(nodes[0]);
