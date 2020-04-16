@@ -43,7 +43,7 @@ namespace AN_Project
         /// <summary>
         /// The maximum time the search is allowed to take
         /// </summary>
-        private int MaxTimeAllowed { get; }
+        private double MaxTimeAllowed { get; }
 
         /// <summary>
         /// Constructor for Simulated Annealing
@@ -55,7 +55,7 @@ namespace AN_Project
         /// <param name="multiplyTemperaturePerIterations">Per how many iterations the temperature should be multiplied</param>
         /// <param name="timer">A RUNNING! timer to keep track of how long the simulated annealing is allowed to take</param>
         /// <param name="maxTimeAllowed">The maximum amount of time the search is allowed to take</param>
-        public SimulatedAnnealing(Random random, double startTemperature, double resetTemperatureThreshold, double temperatureMultiplier, int multiplyTemperaturePerIterations, Stopwatch timer, int maxTimeAllowed)
+        public SimulatedAnnealing(Random random, double startTemperature, double resetTemperatureThreshold, double temperatureMultiplier, int multiplyTemperaturePerIterations, Stopwatch timer, double maxTimeAllowed)
         {
             Random = random;
             StartTemperature = startTemperature;
@@ -75,7 +75,6 @@ namespace AN_Project
         {
             S state = initialState;
             double bestTotalScore = initialState.Score;
-            bestStateSoFar = initialState.Data.ToString();
             double previousScore = bestTotalScore;
             double temperature = StartTemperature;
             int iterations = 0;
@@ -92,7 +91,7 @@ namespace AN_Project
                 // Update the scores and best solution if necessary
                 if (newScore <= previousScore)
                 {
-                    if(newScore <= bestTotalScore)
+                    if(newScore < bestTotalScore)
                     {
                         bestStateSoFar = state.Data.ToString();
                         bestTotalScore = newScore;

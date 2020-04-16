@@ -11,22 +11,22 @@ namespace AN_Project
         /// <summary>
         /// The maximum time initial solutions can use
         /// </summary>
-        public const int MAX_TIME_INITIAL_SOLUTIONS_SECONDS = 10; // 480 sec = 8 minutes
+        public const double MAX_TIME_INITIAL_SOLUTIONS_SECONDS = 480; // 480 sec = 8 minutes
 
         /// <summary>
         /// The maximum total the program is allowed to use for a single instance
         /// </summary>
-        public const int MAX_TIME_TOTAL_SECONDS = 0; // 1680 sec = 28 minutes
+        public const double MAX_TIME_TOTAL_SECONDS = 1680; // 1680 sec = 28 minutes
 
         /// <summary>
         /// If the number of nodes is bigger than this value, no faster heuristic is used for the inital solutions
         /// </summary>
-        private const int FASTER_HEURISTIC_CAP = 1500000;
+        private const int FASTER_HEURISTIC_CAP = 2500000;
 
         /// <summary>
         /// If the number of nodes is bigger than this value, no fast heuristic is used for the inital solutions
         /// </summary>
-        private const int FAST_HEURISTIC_CAP = 1000000;
+        private const int FAST_HEURISTIC_CAP = 500000;
 
         /// <summary>
         /// If the number of nodes is bigger than this value, no independent set is used for the inital solutions
@@ -46,7 +46,7 @@ namespace AN_Project
         /// <summary>
         /// Reset threshold for the temperature in Simulated Annealing
         /// </summary>
-        private const double RESET_TEMPERATURE_THRESHOLD = 0.05;
+        private const double RESET_TEMPERATURE_THRESHOLD = 0.01;
 
         /// <summary>
         /// Temperature multiplier for Simulated Annealing
@@ -105,7 +105,7 @@ namespace AN_Project
             //parameterizedThreadStart = new ParameterizedThreadStart((q) => RunSimAnnealingConsole());
             //parameterizedThreadStart = new ParameterizedThreadStart((q) => RunExactConsole());
 
-            string fileName = "heur_199";
+            //string fileName = "heur_199";
             //parameterizedThreadStart = new ParameterizedThreadStart((q) => RunSimAnnealing(fileName));
             //parameterizedThreadStart = new ParameterizedThreadStart((q) => RunExact(fileName));
 
@@ -123,7 +123,7 @@ namespace AN_Project
         /// <param name="treeRepresentation">The string representation of a RecursiveTree</param>
         private static void RecreateTree(string treeRepresentation)
         {
-            string[] split = treeRepresentation.Split();
+            string[] split = treeRepresentation.Split('\n');
             int numberNodes = split.Length - 2;
 
             // Delete all the children; they are re-added in the next loop
@@ -232,8 +232,16 @@ namespace AN_Project
             // Find an initial solution using the RecursiveSplit using a fast but bad heuristic
             if (allNodes.Length <= FASTER_HEURISTIC_CAP)
             {
+                double maxTime = MAX_TIME_INITIAL_SOLUTIONS_SECONDS;
+                if (allNodes.Length > INDEPENDENT_SET_CAP)
+                {
+                    if (allNodes.Length > FAST_HEURISTIC_CAP) maxTime *= 3;
+                    else maxTime *= 1.5;
+                }
+                else if(allNodes.Length > FAST_HEURISTIC_CAP) maxTime *= 1.5;
+
                 initialSolutionsTimer.Start();
-                bestTree = recursiveSplit.GetFastHeuristicTree(initialSolutionsTimer, true);
+                bestTree = recursiveSplit.GetFastHeuristicTree(initialSolutionsTimer, maxTime, true);
                 if (!console)
                 {
                     Console.WriteLine($"Fastest heuristic tree found with depth {bestTree.Depth}.");
@@ -243,7 +251,15 @@ namespace AN_Project
             // Find an initial solution using the RecursiveSplit using a decent but pretty slow heuristic
             if (allNodes.Length <= FAST_HEURISTIC_CAP)
             {
-                RecursiveTree<Node> treeFromFastHeuristic = recursiveSplit.GetFastHeuristicTree(initialSolutionsTimer, false);
+                double maxTime = MAX_TIME_INITIAL_SOLUTIONS_SECONDS;
+                if (allNodes.Length > INDEPENDENT_SET_CAP)
+                {
+                    if (allNodes.Length > FASTER_HEURISTIC_CAP) maxTime *= 3;
+                    else maxTime *= 1.5;
+                }
+                else if (allNodes.Length > FASTER_HEURISTIC_CAP) maxTime *= 1.5;
+
+                RecursiveTree<Node> treeFromFastHeuristic = recursiveSplit.GetFastHeuristicTree(initialSolutionsTimer, maxTime, false);
                 if (bestTree == null || treeFromFastHeuristic.Depth < bestTree.Depth)
                 {
                     bestTree = treeFromFastHeuristic;
@@ -257,7 +273,15 @@ namespace AN_Project
             // If the problem instance is small enough, we would like to try to find an initial solution using independent sets
             if (allNodes.Length <= INDEPENDENT_SET_CAP)
             {
-                RecursiveTree<Node> treeFromIndependentSet = IndependentSet.TreeFromIndependentSets(allNodes, initialSolutionsTimer, MAX_TIME_INITIAL_SOLUTIONS_SECONDS * 3);
+                double maxTime = MAX_TIME_INITIAL_SOLUTIONS_SECONDS;
+                if (allNodes.Length > FAST_HEURISTIC_CAP)
+                {
+                    if (allNodes.Length > FASTER_HEURISTIC_CAP) maxTime *= 3;
+                    else maxTime *= 1.5;
+                }
+                else if (allNodes.Length > FASTER_HEURISTIC_CAP) maxTime *= 1.5;
+
+                RecursiveTree<Node> treeFromIndependentSet = IndependentSet.TreeFromIndependentSets(allNodes, initialSolutionsTimer, maxTime);
                 if (bestTree == null || treeFromIndependentSet.Depth < bestTree.Depth)
                 {
                     bestTree = treeFromIndependentSet;
@@ -266,13 +290,19 @@ namespace AN_Project
                 {
                     Console.WriteLine($"Independent set tree found with depth {treeFromIndependentSet.Depth}.");
                 }
+
+                if (bestTree != null)
+                {
+                    bestStateSoFar = bestTree.ToString();
+                    RecreateTree(bestStateSoFar);
+                }
             }
 
             // Recreate the tree and save the best found initial solution as the initial solution for simulated annealing
             initialSolutionsTimer.Reset();
             if (bestTree != null)
             {
-                RecreateTree(bestTree.ToString());
+                bestStateSoFar = bestTree.ToString();
                 heurInitState = new RecursiveTreeState(allRecTreeNodes[0].Root, Random);
             }
             simulatedAnnealing.Search(heurInitState, ref bestStateSoFar);

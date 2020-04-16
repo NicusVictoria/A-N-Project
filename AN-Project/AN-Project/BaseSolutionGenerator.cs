@@ -14,7 +14,7 @@ namespace AN_Project
         public static RecursiveTree<Node> LineRecursiveTree()
         {
             Program.allRecTreeNodes = new List<RecursiveTree<Node>>();
-            int numberOfNodes = Program.allNodes.Count;
+            int numberOfNodes = Program.allNodes.Length;
             
             // Create the root of the line
             RecursiveTree<Node> recTree = new RecursiveTree<Node>(Program.allNodes[0]);

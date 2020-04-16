@@ -28,17 +28,15 @@ namespace AN_Project
             connectedComponents = new List<List<Node>>();
         }
 
-        public RecursiveTree<Node> GetFastHeuristicTree(Stopwatch timer, bool fast = true)
+        public RecursiveTree<Node> GetFastHeuristicTree(Stopwatch timer, double maxTimeAllowed, bool fast = true)
         {
             Node[] nodes = (Node[])allNodes.Clone();
-            return RecGetFastHeuristicTree(nodes, new HashSet<Node>(), 0, allNodes.Length, timer, fast);
+            return RecGetFastHeuristicTree(nodes, new HashSet<Node>(), 0, allNodes.Length, timer, maxTimeAllowed, fast);
         }
 
-        private RecursiveTree<Node> RecGetFastHeuristicTree(Node[] nodes, HashSet<Node> ancestors, int left, int right, Stopwatch timer, bool fast) // Left inclusive, right exclusive
+        private RecursiveTree<Node> RecGetFastHeuristicTree(Node[] nodes, HashSet<Node> ancestors, int left, int right, Stopwatch timer, double maxTimeAllowed, bool fast) // Left inclusive, right exclusive
         {
-            double maxTime = Program.MAX_TIME_INITIAL_SOLUTIONS_SECONDS;
-            if (!fast) maxTime *= 2;
-            if (timer.Elapsed.TotalSeconds >= maxTime)
+            if (timer.Elapsed.TotalSeconds >= maxTimeAllowed)
             {
                 return CreateLine(nodes.Skip(left).Take(right - left).ToList());
             }
@@ -94,7 +92,7 @@ namespace AN_Project
 
             for (int i = 0; i < borders.Length; i++)
             {
-                RecursiveTree<Node> ChildTree = RecGetFastHeuristicTree(nodes, ancestors, borders[i].Item1, borders[i].Item2, timer, fast);
+                RecursiveTree<Node> ChildTree = RecGetFastHeuristicTree(nodes, ancestors, borders[i].Item1, borders[i].Item2, timer, maxTimeAllowed, fast);
                 ChildTree.Parent = newTree;
                 newTree.AddChild(ChildTree);
             }

@@ -16,7 +16,7 @@ namespace AN_Project
         /// <param name="timer">A RUNNING! timer to keep track of the total time this computation takes</param>
         /// <param name="maxTimeAllowed">The total time the computation is allowed to take. If this time is exceeded, all remaining nodes are placed in a single line on top of the tree with independent sets computed thus far</param>
         /// <returns>A RecursiveTree built by using maximal independent sets</returns>
-        public static RecursiveTree<Node> TreeFromIndependentSets(Node[] inputGraph, Stopwatch timer, int maxTimeAllowed)
+        public static RecursiveTree<Node> TreeFromIndependentSets(Node[] inputGraph, Stopwatch timer, double maxTimeAllowed)
         {
             List<Node> graph = new List<Node>(inputGraph);
             List<Node> independentSet = CalculateMaximal(graph);

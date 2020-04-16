@@ -36,7 +36,7 @@ namespace AN_Project
         /// <param name="random">An arbitrary instance of random</param>
         public State(S data, Random random)
         {
-            this.Data = data;
+            Data = data;
             Random = random;
         }
 

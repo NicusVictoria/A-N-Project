@@ -269,6 +269,7 @@ namespace AN_Project
         /// <returns>The tree in string representation</returns>
         private string PrintTree(RecursiveTree<Node> root)
         {
+            
             // Save the number of the parent of each node in an array
             int[] nodeArray = new int[root.NumberOfNodesInSubtree];
             nodeArray[root.Value.Number - 1] = 0;
@@ -276,6 +277,7 @@ namespace AN_Project
             {
                 PrintTree(subTree, nodeArray);
             }
+            
 
             // Use a stringbuilder to print the tree
             StringBuilder stringBuilder = new StringBuilder();
@@ -285,9 +287,10 @@ namespace AN_Project
             stringBuilder.Append("\n");
 
             // Print each node's parent
-            for (int i = 0; i < nodeArray.Length; i++)
+            for (int i = 0; i < nodeArray.Length/*Program.allRecTreeNodes.Count*/; i++)
             {
-                stringBuilder.Append(nodeArray[i]);
+                /*if (Program.allRecTreeNodes[i].Parent == null) stringBuilder.Append("0");
+                else */stringBuilder.Append(/*Program.allRecTreeNodes[i].Parent.Value*/nodeArray[i]);
                 stringBuilder.Append("\n");
             }
 
