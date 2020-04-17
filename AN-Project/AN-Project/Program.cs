@@ -11,12 +11,12 @@ namespace AN_Project
         /// <summary>
         /// The maximum time initial solutions can use
         /// </summary>
-        public const double MAX_TIME_INITIAL_SOLUTIONS_SECONDS = 540; // 540 sec = 9 minutes
+        private const double MAX_TIME_INITIAL_SOLUTIONS_SECONDS = 540; // 540 sec = 9 minutes
 
         /// <summary>
         /// The maximum total the program is allowed to use for a single instance
         /// </summary>
-        public const double MAX_TIME_TOTAL_SECONDS = 1680; // 1680 sec = 28 minutes
+        private const double MAX_TIME_TOTAL_SECONDS = 1680; // 1680 sec = 28 minutes
 
         /// <summary>
         /// If the number of nodes is bigger than this value, no faster heuristic is used for the inital solutions
@@ -71,12 +71,12 @@ namespace AN_Project
         /// <summary>
         /// Array of all nodes in this instance
         /// </summary>
-        public static Node[] allNodes;
+        private static Node[] allNodes;
 
         /// <summary>
         /// List of all recursive trees that are used in this instance
         /// </summary>
-        public static List<RecursiveTree<Node>> allRecTreeNodes;
+        private static List<RecursiveTree<Node>> allRecTreeNodes;
 
         /// <summary>
         /// Single random used throughout the program
@@ -120,14 +120,14 @@ namespace AN_Project
 
             // Multiple run modes, select one and comment the rest
 
-            parameterizedThreadStart = new ParameterizedThreadStart((q) => RunSimAnnealingConsole());
+            //parameterizedThreadStart = new ParameterizedThreadStart((q) => RunSimAnnealingConsole());
             //parameterizedThreadStart = new ParameterizedThreadStart((q) => RunExactConsole());
 
-            //string fileName = "heur_199";
+            //string fileName = "heur_177";
             //parameterizedThreadStart = new ParameterizedThreadStart((q) => RunSimAnnealing(fileName));
             //parameterizedThreadStart = new ParameterizedThreadStart((q) => RunExact(fileName));
 
-            //parameterizedThreadStart = new ParameterizedThreadStart((q) => RunAllSimAnnealing());
+            parameterizedThreadStart = new ParameterizedThreadStart((q) => RunAllSimAnnealing());
             //parameterizedThreadStart = new ParameterizedThreadStart((q) => RunAllExact());
 
             // Create a new thread and execute the program, using 1GB of stack size
@@ -239,7 +239,7 @@ namespace AN_Project
             RecursiveSplit recursiveSplit = new RecursiveSplit(inputAsNodes);
 
             // Find an initial solution where all nodes are in a single line
-            RecursiveTreeState heurInitState = new RecursiveTreeState(BaseSolutionGenerator.LineRecursiveTree(), random);
+            RecursiveTreeState heurInitState = new RecursiveTreeState(BaseSolutionGenerator.LineRecursiveTree(ref allRecTreeNodes, allNodes), random, allRecTreeNodes);
             bestStateSoFar = heurInitState.Data.ToString();
             if (!console)
             {
@@ -259,7 +259,7 @@ namespace AN_Project
                 else if (allNodes.Length > FAST_HEURISTIC_CAP) maxTime *= 1.5;
 
                 initialSolutionsTimer.Start();
-                bestTree = recursiveSplit.GetFastHeuristicTree(initialSolutionsTimer, maxTime, true);
+                bestTree = recursiveSplit.GetHeuristicTree(initialSolutionsTimer, maxTime, true);
                 if (!console)
                 {
                     Console.WriteLine($"Fastest heuristic tree found with depth {bestTree.Depth}.");
@@ -271,14 +271,11 @@ namespace AN_Project
             if (allNodes.Length <= FAST_HEURISTIC_CAP)
             {
                 double maxTime = MAX_TIME_INITIAL_SOLUTIONS_SECONDS;
-                if (allNodes.Length > INDEPENDENT_SET_CAP)
-                {
-                    if (allNodes.Length > FASTER_HEURISTIC_CAP) maxTime *= 3;
-                    else maxTime *= 1.5;
-                }
+                if (allNodes.Length > INDEPENDENT_SET_CAP) maxTime *= 3;
                 else if (allNodes.Length > FASTER_HEURISTIC_CAP) maxTime *= 1.5;
+                else maxTime *= 2;
 
-                RecursiveTree<Node> treeFromFastHeuristic = recursiveSplit.GetFastHeuristicTree(initialSolutionsTimer, maxTime, false);
+                RecursiveTree<Node> treeFromFastHeuristic = recursiveSplit.GetHeuristicTree(initialSolutionsTimer, maxTime, false);
                 if (bestTree == null || treeFromFastHeuristic.Depth < bestTree.Depth)
                 {
                     bestTree = treeFromFastHeuristic;
@@ -293,14 +290,7 @@ namespace AN_Project
             // If the problem instance is small enough, we would like to try to find an initial solution using independent sets
             if (allNodes.Length <= INDEPENDENT_SET_CAP)
             {
-                double maxTime = MAX_TIME_INITIAL_SOLUTIONS_SECONDS;
-                if (allNodes.Length > FAST_HEURISTIC_CAP)
-                {
-                    if (allNodes.Length > FASTER_HEURISTIC_CAP) maxTime *= 3;
-                    else maxTime *= 1.5;
-                }
-                else if (allNodes.Length > FASTER_HEURISTIC_CAP) maxTime *= 1.5;
-
+                double maxTime = MAX_TIME_INITIAL_SOLUTIONS_SECONDS * 3;
                 RecursiveTree<Node> treeFromIndependentSet = IndependentSet.TreeFromIndependentSets(allNodes, initialSolutionsTimer, maxTime);
                 if (bestTree == null || treeFromIndependentSet.Depth < bestTree.Depth)
                 {
@@ -311,12 +301,6 @@ namespace AN_Project
                     Console.WriteLine($"Independent set tree found with depth {treeFromIndependentSet.Depth}.");
                     totalTreedepthIndependentSet += treeFromIndependentSet.Depth;
                 }
-
-                if (bestTree != null)
-                {
-                    bestStateSoFar = bestTree.ToString();
-                    RecreateTree(bestStateSoFar);
-                }
             }
 
             // Recreate the tree and save the best found initial solution as the initial solution for simulated annealing
@@ -324,7 +308,8 @@ namespace AN_Project
             if (bestTree != null)
             {
                 bestStateSoFar = bestTree.ToString();
-                heurInitState = new RecursiveTreeState(allRecTreeNodes[0].Root, random);
+                RecreateTree(bestStateSoFar);
+                heurInitState = new RecursiveTreeState(allRecTreeNodes[0].Root, random, allRecTreeNodes);
                 totalTreedepthBest += bestTree.Depth;
             }
 
@@ -336,10 +321,8 @@ namespace AN_Project
             // If the input from the console is not used, write the output to a file, otherwise write it back to the console
             if (!console)
             {
-                using (StreamWriter sw = new StreamWriter($"..\\..\\..\\..\\..\\Results\\{fileName}.tree", false))
-                {
-                    sw.Write(bestStateSoFar);
-                }
+                using StreamWriter sw = new StreamWriter($"..\\..\\..\\..\\..\\Results\\{fileName}.tree", false);
+                sw.Write(bestStateSoFar);
             }
             else
             {

@@ -107,11 +107,6 @@ namespace AN_Project
         private readonly RecursiveTree<Node> oldRoot;
 
         /// <summary>
-        /// The depth of the tree before the move happens
-        /// </summary>
-        private readonly int startDepth;
-
-        /// <summary>
         /// The node that is moved up
         /// </summary>
         public RecursiveTree<Node> MoveNode { get; }
@@ -127,7 +122,6 @@ namespace AN_Project
             this.newParent = newParent;
             oldParent = moveNode.Parent;
             oldRoot = moveNode.Root;
-            startDepth = oldRoot.Depth;
         }
 
         public override double Delta()

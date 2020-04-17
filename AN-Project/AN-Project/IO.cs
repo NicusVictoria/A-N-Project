@@ -18,7 +18,7 @@ namespace AN_Project
         {
             int numberOfNodes = -1;
             int numberOfEdges = -1;
-            int counter = -1; // UNUSED
+            int counter = -1; // UNUSED here, needed for the HandleLine method
             Node[] allNodes = new Node[0];
 
             // Using the streamreader to read the input file
@@ -33,7 +33,7 @@ namespace AN_Project
             }
 
             // Calculate some extra values to be used in the heuristics
-            PrecomputeHeuristicValues(allNodes, centerResemblanceCap, articulationPointMinimum);
+            // PrecomputeHeuristicValues(allNodes, centerResemblanceCap, articulationPointMinimum); // These heuristic values only made our solutions worse, so there are not used and not computed any more
             return allNodes;
         }
 
@@ -57,7 +57,7 @@ namespace AN_Project
             }
 
             // Calculate some extra values to be used in the heuristics
-            PrecomputeHeuristicValues(allNodes, centerResemblanceCap, articulationPointMinimum);
+            // PrecomputeHeuristicValues(allNodes, centerResemblanceCap, articulationPointMinimum); // These heuristic values only made our solutions worse, so there are not used and not computed any more
             return allNodes;
         }
 
@@ -114,8 +114,8 @@ namespace AN_Project
         /// <param name="centerResemblanceCap">The maximum number of nodes for which the center resemblance is computed</param>
         private static void PrecomputeHeuristicValues(Node[] allNodes, int centerResemblanceCap, int articulationPointMinimum)
         {
-            // if (allNodes.Length <= centerResemblanceCap) CalculateCenterResemblances(allNodes); // TODO: not used anyways :)
-            // if (allNodes.Length >= articulationPointMinimum) CalculateArticulationPoints(allNodes); // TODO: not used anyways :)
+            if (allNodes.Length <= centerResemblanceCap) CalculateCenterResemblances(allNodes);
+            if (allNodes.Length >= articulationPointMinimum) CalculateArticulationPoints(allNodes);
         }
 
         /// <summary>

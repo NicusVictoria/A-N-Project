@@ -11,25 +11,25 @@ namespace AN_Project
         /// Create a RecursiveTree with all nodes in a single line (each tree has exactly one child, except for the single leaf)
         /// </summary>
         /// <returns>The root of a RecursiveTree in a line</returns>
-        public static RecursiveTree<Node> LineRecursiveTree()
+        public static RecursiveTree<Node> LineRecursiveTree(ref List<RecursiveTree<Node>> allRecTreeNodes, Node[] allNodes)
         {
-            Program.allRecTreeNodes = new List<RecursiveTree<Node>>();
-            int numberOfNodes = Program.allNodes.Length;
+            allRecTreeNodes = new List<RecursiveTree<Node>>();
+            int numberOfNodes = allNodes.Length;
             
             // Create the root of the line
-            RecursiveTree<Node> recTree = new RecursiveTree<Node>(Program.allNodes[0]);
-            Program.allRecTreeNodes.Add(recTree);
+            RecursiveTree<Node> recTree = new RecursiveTree<Node>(allNodes[0]);
+            allRecTreeNodes.Add(recTree);
 
             // Loop through all other nodes and create trees for them with the correct parent and cildren references
             RecursiveTree<Node> child = recTree;
             for (int i = 1; i < numberOfNodes; i++)
             {
-                Node newNode = Program.allNodes[i];
+                Node newNode = allNodes[i];
                 RecursiveTree<Node> parent = new RecursiveTree<Node>(newNode);
                 child.Parent = parent;
                 parent.AddChild(child);
                 child = parent;
-                Program.allRecTreeNodes.Add(parent);
+                allRecTreeNodes.Add(parent);
             }
             return recTree;
         }

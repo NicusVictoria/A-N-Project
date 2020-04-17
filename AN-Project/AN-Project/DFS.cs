@@ -29,7 +29,7 @@ namespace AN_Project
                     stack.Push(n);
                 }
             }
-            throw new Exception("there were no nodes that matched the criteria");
+            throw new Exception("There were no nodes that matched the criteria");
         }
 
         /// <summary>
@@ -48,8 +48,6 @@ namespace AN_Project
             while (stack.Count != 0)
             {
                 N node = stack.Pop();
-                //if (beenList.Contains(node)) continue;
-                //beenList.Add(node);
                 if (targetSelection(node)) retList.Add(node);
                 foreach (N n in node.ConnectedNodes)
                 {

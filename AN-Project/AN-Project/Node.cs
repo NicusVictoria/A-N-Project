@@ -5,6 +5,10 @@ using System.Linq;
 
 namespace AN_Project
 {
+    /// <summary>
+    /// Interface for a node that is connected to other nodes
+    /// </summary>
+    /// <typeparam name="N"></typeparam>
     public interface INode<N> where N : INode<N>
     {
         /// <summary>
@@ -34,7 +38,14 @@ namespace AN_Project
     /// </summary>
     public class Node : INode<Node>, IComparable<Node>
     {
+        /// <summary>
+        /// The value with which the center resemblance value of this node is multiplied to be used in the heuristic
+        /// </summary>
         private const double CENTER_RESEMBLANCE_MULTIPLIER = 0;
+
+        /// <summary>
+        /// The value with which the articulation point value of this node is multiplied to be used in the heuristic
+        /// </summary>
         private const double ARTICULATION_POINT_MULTIPLIER = 0;
 
         private double centerResemblance;
@@ -60,7 +71,7 @@ namespace AN_Project
         /// <summary>
         /// Whether this point is an articulation point, and its value. 0 is no articulation point, >0 is an articulation point.
         /// </summary>
-        public double ArticulationPointValue { get { return articulationPointValue; } set {articulationPointValue = value * ARTICULATION_POINT_MULTIPLIER; } }
+        public double ArticulationPointValue { get { return articulationPointValue; } set { articulationPointValue = value * ARTICULATION_POINT_MULTIPLIER; } }
 
         /// <summary>
         /// A measure for how good it is to choose this node for certain operations
@@ -81,10 +92,10 @@ namespace AN_Project
         }
 
         /// <summary>
-        /// Calculates the degree o this node while only considering nodes that are in the subgraph. Ignores connections to all other nodes
+        /// Calculates the degree of this node while only considering nodes that are in the subgraph. Ignores connections to all other nodes
         /// </summary>
         /// <param name="subGraph">The subgraph to calculate the remaining degree in</param>
-        /// <returns></returns>
+        /// <returns>The remaining degree of this node in the subgraph</returns>
         public int RemainingDegree(HashSet<Node> subGraph) => ConnectedNodes.Count(n => subGraph.Contains(n));
 
         int IComparable<Node>.CompareTo(Node other)

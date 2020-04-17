@@ -123,6 +123,11 @@ namespace AN_Project
     /// </summary>
     class RecursiveTreeState : State<RecursiveTree<Node>>
     {
+        /// <summary>
+        /// List of all RecursiveTrees in this instance
+        /// </summary>
+        private List<RecursiveTree<Node>> AllRecTreeNodes { get; }
+
         public override double Score { get => Data.Root.Depth; }
 
         private double[] CumulativeHeuristic { get; }
@@ -132,18 +137,20 @@ namespace AN_Project
         /// </summary>
         /// <param name="Data">The initial data to use</param>
         /// <param name="random">The random to be used</param>
-        public RecursiveTreeState(RecursiveTree<Node> Data, Random random) : base(Data, random)
+        /// <param name="allRecTreeNodes">List of all RecursiveTrees in this instance</param>
+        public RecursiveTreeState(RecursiveTree<Node> Data, Random random, List<RecursiveTree<Node>> allRecTreeNodes) : base(Data, random)
         {
-            CumulativeHeuristic = new double[Program.allRecTreeNodes.Count];
+            AllRecTreeNodes = allRecTreeNodes;
+            CumulativeHeuristic = new double[AllRecTreeNodes.Count];
             CalculateCumulativeHeuristic();
         }
 
         private void CalculateCumulativeHeuristic()
         {
             double counter = 0;
-            for (int i = 0; i < Program.allRecTreeNodes.Count; i++)
+            for (int i = 0; i < AllRecTreeNodes.Count; i++)
             {
-                counter += Program.allRecTreeNodes[i].Value.Heuristic;
+                counter += AllRecTreeNodes[i].Value.Heuristic;
                 CumulativeHeuristic[i] = counter;
             }
         }
@@ -154,10 +161,10 @@ namespace AN_Project
             {
                 return new List<Tuple<INeighbourSpace<RecursiveTree<Node>>, double>>()
                 {
-                    new Tuple<INeighbourSpace<RecursiveTree<Node>>, double>(new SplitNeighbourSpace(Random, CumulativeHeuristic), 0.2f),
-                    new Tuple<INeighbourSpace<RecursiveTree<Node>>, double>(new MoveUpNeighbourSpace(Random, CumulativeHeuristic), 0.2f),
-                    new Tuple<INeighbourSpace<RecursiveTree<Node>>, double>(new MoveAndSplitNeighbourSpace(Random, CumulativeHeuristic), 0.1f),
-                    new Tuple<INeighbourSpace<RecursiveTree<Node>>, double>(new RandomMoveAndSplitNeighbourSpace(Random, 3, CumulativeHeuristic), 0.5f)
+                    new Tuple<INeighbourSpace<RecursiveTree<Node>>, double>(new SplitNeighbourSpace(AllRecTreeNodes, Random, CumulativeHeuristic), 0.2f),
+                    new Tuple<INeighbourSpace<RecursiveTree<Node>>, double>(new MoveUpNeighbourSpace(AllRecTreeNodes, Random, CumulativeHeuristic), 0.2f),
+                    new Tuple<INeighbourSpace<RecursiveTree<Node>>, double>(new MoveAndSplitNeighbourSpace(AllRecTreeNodes, Random, CumulativeHeuristic), 0.1f),
+                    new Tuple<INeighbourSpace<RecursiveTree<Node>>, double>(new RandomMoveAndSplitNeighbourSpace(AllRecTreeNodes, Random, 3, CumulativeHeuristic), 0.5f)
                 };
             }
         }

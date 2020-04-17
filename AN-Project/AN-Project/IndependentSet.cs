@@ -184,7 +184,7 @@ namespace AN_Project
         private static List<Node> CalculateMaximal(List<Node> graph)
         {
             // Order the nodes so the best node to take is first in the list
-            graph = graph.OrderBy(n => n.Degree + n.CenterResemblance).ToList();
+            graph.Sort();
             List<Node> retList = new List<Node>();
             HashSet<Node> coveredNodes = new HashSet<Node>();
             for (int i = 0; i < graph.Count; i++)

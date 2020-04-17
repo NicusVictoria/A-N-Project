@@ -35,11 +35,6 @@ namespace AN_Project
         private List<RecursiveTree<V>> ChildrenList { get; set; }
 
         /// <summary>
-        /// Scorekeeper to keep track of the current score of this tree
-        /// </summary>
-        public ScoreKeeper ScoreKeeper { get; set; }
-
-        /// <summary>
         /// The node in this tree
         /// </summary>
         public V Value { get; set; }
@@ -169,7 +164,6 @@ namespace AN_Project
         {
             Value = n;
             ChildrenList = new List<RecursiveTree<V>>();
-            ScoreKeeper = new ScoreKeeper();
         }
 
         /// <summary>
@@ -180,7 +174,6 @@ namespace AN_Project
         {
             Value = original.Value;
             ChildrenList = original.ChildrenList;
-            ScoreKeeper = new ScoreKeeper();
         }
 
         /// <summary>
@@ -228,7 +221,7 @@ namespace AN_Project
         /// </summary>
         public void RemoveAllChildren()
         {
-            ChildrenList.Clear();
+            ChildrenList = new List<RecursiveTree<V>>();
         }
     
         public override string ToString()
@@ -251,7 +244,6 @@ namespace AN_Project
         /// <returns>The tree in string representation</returns>
         private string PrintTree(RecursiveTree<Node> root)
         {
-            
             // Save the number of the parent of each node in an array
             int[] nodeArray = new int[root.NumberOfNodesInSubtree];
             nodeArray[root.Value.Number - 1] = 0;
@@ -259,7 +251,6 @@ namespace AN_Project
             {
                 PrintTree(subTree, nodeArray);
             }
-            
 
             // Use a stringbuilder to print the tree
             StringBuilder stringBuilder = new StringBuilder();
@@ -271,8 +262,7 @@ namespace AN_Project
             // Print each node's parent
             for (int i = 0; i < nodeArray.Length/*Program.allRecTreeNodes.Count*/; i++)
             {
-                /*if (Program.allRecTreeNodes[i].Parent == null) stringBuilder.Append("0");
-                else */stringBuilder.Append(/*Program.allRecTreeNodes[i].Parent.Value*/nodeArray[i]);
+                stringBuilder.Append(/*Program.allRecTreeNodes[i].Parent.Value*/nodeArray[i]);
                 stringBuilder.Append("\n");
             }
 
