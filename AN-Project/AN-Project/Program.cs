@@ -11,7 +11,7 @@ namespace AN_Project
         /// <summary>
         /// The maximum time initial solutions can use
         /// </summary>
-        private const double MAX_TIME_INITIAL_SOLUTIONS_SECONDS = 540; // 540 sec = 9 minutes
+        private const double MAX_TIME_INITIAL_SOLUTIONS_SECONDS = 420; // 420 sec = 7 minutes
 
         /// <summary>
         /// The maximum total the program is allowed to use for a single instance
@@ -21,12 +21,12 @@ namespace AN_Project
         /// <summary>
         /// If the number of nodes is bigger than this value, no faster heuristic is used for the inital solutions
         /// </summary>
-        private const int FASTER_HEURISTIC_CAP = 2500000;
+        private const int FASTER_HEURISTIC_CAP = -1;
 
         /// <summary>
         /// If the number of nodes is bigger than this value, no fast heuristic is used for the inital solutions
         /// </summary>
-        private const int FAST_HEURISTIC_CAP = 500000;
+        private const int FAST_HEURISTIC_CAP = 1000000;
 
         /// <summary>
         /// If the number of nodes is bigger than this value, no independent set is used for the inital solutions
@@ -36,7 +36,7 @@ namespace AN_Project
         /// <summary>
         /// If the number of nodes is bigger than this value, local search is not used
         /// </summary>
-        private const int SIMULATED_ANNEALING_CAP = 200000;
+        private const int SIMULATED_ANNEALING_CAP = 1000000;
 
         /// <summary>
         /// If the number of nodes is bigger than this value, center resemblance is not used in the heuristic
@@ -51,7 +51,7 @@ namespace AN_Project
         /// <summary>
         /// Start temperature for Simulated Annealing
         /// </summary>
-        private const double START_TEMP = .3;
+        private const double START_TEMP = 0.3;
 
         /// <summary>
         /// Reset threshold for the temperature in Simulated Annealing
@@ -103,14 +103,6 @@ namespace AN_Project
         /// </summary>
         private static string bestStateSoFar;
 
-
-        // TODO: debug stuff only
-        private static int totalTreedepthFaster = 0;
-        private static int totalTreedepthFast = 0;
-        private static int totalTreedepthIndependentSet = 0;
-        private static int totalTreedepthBest = 0;
-
-
         /// <summary>
         /// Main method for the program
         /// </summary>
@@ -120,14 +112,14 @@ namespace AN_Project
 
             // Multiple run modes, select one and comment the rest
 
-            //parameterizedThreadStart = new ParameterizedThreadStart((q) => RunSimAnnealingConsole());
+            parameterizedThreadStart = new ParameterizedThreadStart((q) => RunSimAnnealingConsole());
             //parameterizedThreadStart = new ParameterizedThreadStart((q) => RunExactConsole());
 
             //string fileName = "heur_177";
             //parameterizedThreadStart = new ParameterizedThreadStart((q) => RunSimAnnealing(fileName));
             //parameterizedThreadStart = new ParameterizedThreadStart((q) => RunExact(fileName));
 
-            parameterizedThreadStart = new ParameterizedThreadStart((q) => RunAllSimAnnealing());
+            //parameterizedThreadStart = new ParameterizedThreadStart((q) => RunAllSimAnnealing());
             //parameterizedThreadStart = new ParameterizedThreadStart((q) => RunAllExact());
 
             // Create a new thread and execute the program, using 1GB of stack size
@@ -246,6 +238,7 @@ namespace AN_Project
                 Console.WriteLine($"Line found with depth {heurInitState.Data.Root.Depth}.");
             }
 
+            initialSolutionsTimer.Start();
             RecursiveTree<Node> bestTree = null;
             // Find an initial solution using the RecursiveSplit using a fast but bad heuristic
             if (allNodes.Length <= FASTER_HEURISTIC_CAP)
@@ -258,12 +251,10 @@ namespace AN_Project
                 }
                 else if (allNodes.Length > FAST_HEURISTIC_CAP) maxTime *= 1.5;
 
-                initialSolutionsTimer.Start();
                 bestTree = recursiveSplit.GetHeuristicTree(initialSolutionsTimer, maxTime, true);
                 if (!console)
                 {
                     Console.WriteLine($"Fastest heuristic tree found with depth {bestTree.Depth}.");
-                    totalTreedepthFaster += bestTree.Depth;
                 }
             }
 
@@ -283,7 +274,6 @@ namespace AN_Project
                 if (!console)
                 {
                     Console.WriteLine($"Fast heuristic tree found with depth {treeFromFastHeuristic.Depth}.");
-                    totalTreedepthFast += treeFromFastHeuristic.Depth;
                 }
             }
 
@@ -299,7 +289,6 @@ namespace AN_Project
                 if (!console)
                 {
                     Console.WriteLine($"Independent set tree found with depth {treeFromIndependentSet.Depth}.");
-                    totalTreedepthIndependentSet += treeFromIndependentSet.Depth;
                 }
             }
 
@@ -310,7 +299,6 @@ namespace AN_Project
                 bestStateSoFar = bestTree.ToString();
                 RecreateTree(bestStateSoFar);
                 heurInitState = new RecursiveTreeState(allRecTreeNodes[0].Root, random, allRecTreeNodes);
-                totalTreedepthBest += bestTree.Depth;
             }
 
             if (allNodes.Length <= SIMULATED_ANNEALING_CAP) 
@@ -321,8 +309,10 @@ namespace AN_Project
             // If the input from the console is not used, write the output to a file, otherwise write it back to the console
             if (!console)
             {
-                using StreamWriter sw = new StreamWriter($"..\\..\\..\\..\\..\\Results\\{fileName}.tree", false);
-                sw.Write(bestStateSoFar);
+                using (StreamWriter sw = new StreamWriter($"..\\..\\..\\..\\..\\Results\\{fileName}.tree", false))
+                {
+                    sw.Write(bestStateSoFar);
+                }
             }
             else
             {
@@ -371,11 +361,6 @@ namespace AN_Project
                 else file += i;
                 RunSimAnnealing(file);
             }
-
-            Console.WriteLine($"Faster\t{totalTreedepthFaster}");
-            Console.WriteLine($"Fast\t{totalTreedepthFast}");
-            Console.WriteLine($"InSet\t{totalTreedepthIndependentSet}");
-            Console.WriteLine($"Best\t{totalTreedepthBest}");
         }
 
         /// <summary>

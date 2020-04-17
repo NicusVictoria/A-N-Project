@@ -93,7 +93,7 @@ namespace AN_Project
         /// <returns>The guided random node</returns>
         private RecursiveTree<Node> GetGuidedMoveUpNode()
         {
-            double totalHeuristic = CumulativeHeuristic[^1];
+            double totalHeuristic = CumulativeHeuristic[CumulativeHeuristic.Length - 1];
             double random = Random.NextDouble() * totalHeuristic;
             int index = Array.BinarySearch(CumulativeHeuristic, random);
             if (index < 0) index = -1 - index;
@@ -156,7 +156,7 @@ namespace AN_Project
         /// <returns>The guided random node</returns>
         private RecursiveTree<Node> GetGuidedSplitNode()
         {
-            double totalHeuristic = CumulativeHeuristic[^1];
+            double totalHeuristic = CumulativeHeuristic[CumulativeHeuristic.Length - 1];
             double random = Random.NextDouble() * totalHeuristic;
             int index = Array.BinarySearch(CumulativeHeuristic, random);
             if (index < 0) index = -1 - index;
